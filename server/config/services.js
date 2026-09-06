@@ -41,6 +41,12 @@ const SERVICES = {
     name: "Custom Project",
     isCustom: true,
   },
+  test: {
+    id: "test",
+    key: "test",
+    name: "Test Package",
+    amount: 5,
+  },
 
   // Aliases for compatibility
   "portfolio-website": {
@@ -78,6 +84,12 @@ const SERVICES = {
     key: "custom",
     name: "Custom Project",
     isCustom: true,
+  },
+  "test-package": {
+    id: "test",
+    key: "test",
+    name: "Test Package",
+    amount: 5,
   },
 };
 

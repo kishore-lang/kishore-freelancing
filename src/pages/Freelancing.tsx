@@ -62,6 +62,15 @@ const FREELANCE_SERVICES: ServiceItem[] = [
     icon: Server,
   },
   {
+    id: "test-package",
+    title: "Test Package",
+    description:
+      "A 5 Rs package for testing live payments and webhook integration.",
+    price: "₹5",
+    numericPrice: 5,
+    icon: Zap,
+  },
+  {
     id: "custom-project",
     title: "Custom Project",
     description:

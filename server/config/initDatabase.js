@@ -97,6 +97,7 @@ const initDatabase = async () => {
         ('ecommerce', 'E-Commerce Website', 8000.00),
         ('fullstack', 'Full-Stack Web Application', 10000.00),
         ('api', 'API / Backend Integration', 4000.00),
+        ('test', 'Test Package', 5.00),
         ('custom', 'Custom Project', NULL)
         ON CONFLICT (service_key) DO UPDATE SET
           service_name = EXCLUDED.service_name,
