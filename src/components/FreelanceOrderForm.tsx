@@ -201,6 +201,7 @@ export const FreelanceOrderForm = ({
         });
       }
     } catch (error: any) {
+      console.error("CRITICAL VERIFICATION ERROR:", error); // Added to debug why fetch fails
       setPaymentResult({
         status: "network_error",
         message: "Payment verification could not be completed. Backend server unavailable.",
@@ -208,7 +209,7 @@ export const FreelanceOrderForm = ({
 
       toast({
         title: "Verification Network Error",
-        description: "Could not connect to backend server for verification.",
+        description: "Could not connect to backend server for verification. Check console.",
         variant: "destructive",
       });
     } finally {
