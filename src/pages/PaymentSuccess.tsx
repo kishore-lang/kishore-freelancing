@@ -33,10 +33,10 @@ const PaymentSuccess = () => {
     }
 
     setReceiptData({
-      customerName: state.formData.name,
-      customerEmail: state.formData.email,
+      customerName: state.formData.fullName || "Customer",
+      customerEmail: state.formData.email || "No Email",
       serviceName: state.selectedService.title,
-      amount: state.selectedService.numericPrice || state.formData.customAmount || 0,
+      amount: Number(state.selectedService.numericPrice || state.formData.customAmount || 0),
       orderId: state.paymentResult.razorpayOrderId,
       paymentId: state.paymentResult.razorpayPaymentId,
       date: new Date().toLocaleString(),
