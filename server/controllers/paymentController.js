@@ -305,7 +305,7 @@ const verifyPayment = async (req, res) => {
 
           // Fetch Customer & Service Details for Notification
           const detailsRes = await client.query(
-            `SELECT c.full_name, c.whatsapp_number, s.service_name, o.amount
+            `SELECT c.full_name, c.email, c.whatsapp_number, s.service_name, o.amount
              FROM orders o
              JOIN customers c ON o.customer_id = c.id
              LEFT JOIN services s ON o.service_id = s.id
@@ -329,6 +329,18 @@ const verifyPayment = async (req, res) => {
             amount: customerDetails?.amount || (amountPaise ? amountPaise / 100 : 0),
             orderId: razorpay_order_id,
             paymentId: razorpay_payment_id,
+          });
+
+          // Trigger Order Confirmation Email asynchronously
+          // We don't await this so it doesn't slow down the response to the user
+          // Error handling is built into the email service so it won't crash the server
+          const emailService = require("../services/emailService");
+          emailService.sendOrderConfirmationEmail({
+            customerName: customerDetails?.full_name || "Customer",
+            customerEmail: customerDetails?.email || null,
+            orderId: razorpay_order_id,
+            serviceName: customerDetails?.service_name || "Freelance Service",
+            amount: customerDetails?.amount || (amountPaise ? amountPaise / 100 : 0),
           });
 
           // Update notification_status in PostgreSQL

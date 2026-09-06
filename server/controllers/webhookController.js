@@ -143,7 +143,7 @@ const handleWebhook = async (req, res) => {
               await client.query(`UPDATE orders SET status = 'paid' WHERE id = $1;`, [internalOrderId]);
 
               const detailsRes = await client.query(
-                `SELECT c.full_name, c.whatsapp_number, s.service_name
+                `SELECT c.full_name, c.email, c.whatsapp_number, s.service_name
                  FROM orders o
                  JOIN customers c ON o.customer_id = c.id
                  LEFT JOIN services s ON o.service_id = s.id
@@ -169,6 +169,16 @@ const handleWebhook = async (req, res) => {
                 amount: amountInRupees,
                 orderId: razorpayOrderId,
                 paymentId: razorpayPaymentId,
+              });
+
+              // Trigger Order Confirmation Email asynchronously
+              const emailService = require("../services/emailService");
+              emailService.sendOrderConfirmationEmail({
+                customerName: customerDetails?.full_name || paymentEntity.notes?.customerName || "Customer",
+                customerEmail: customerDetails?.email || paymentEntity.notes?.customerEmail || null,
+                orderId: razorpayOrderId,
+                serviceName: customerDetails?.service_name || paymentEntity.notes?.serviceName || "Freelance Service",
+                amount: amountInRupees,
               });
 
               if (notifyRes.success) {
