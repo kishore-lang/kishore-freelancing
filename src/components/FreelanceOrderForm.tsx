@@ -174,6 +174,11 @@ export const FreelanceOrderForm = ({
           duration: 6000,
         });
 
+        const foundService = services.find(s => s.title === serviceName);
+        const safeServiceData = foundService 
+          ? { title: foundService.title, numericPrice: foundService.numericPrice } 
+          : { title: serviceName, numericPrice: amountInRupees };
+
         // Redirect to success page with data
         navigate("/payment-success", {
           state: {
@@ -183,7 +188,7 @@ export const FreelanceOrderForm = ({
               razorpayPaymentId: data.payment.paymentId || paymentId,
             },
             formData: form.getValues(),
-            selectedService: services.find(s => s.title === serviceName) || { title: serviceName, numericPrice: amountInRupees },
+            selectedService: safeServiceData,
           }
         });
       } else {
@@ -209,7 +214,7 @@ export const FreelanceOrderForm = ({
 
       toast({
         title: "Verification Network Error",
-        description: "Could not connect to backend server for verification. Check console.",
+        description: `Fetch Error: ${error?.message || "Unknown"}. Check console.`,
         variant: "destructive",
       });
     } finally {
