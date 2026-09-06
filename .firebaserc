@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "portfolio-demo-14a3f"
+  },
+  "targets": {
+    "portfolio-demo-14a3f": {
+      "hosting": {
+        "kishore-lang": [
+          "kishore-port"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
