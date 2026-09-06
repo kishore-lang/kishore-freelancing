@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
@@ -81,6 +82,7 @@ export const FreelanceOrderForm = ({
   onSelectService,
 }: FreelanceOrderFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   const [paymentResult, setPaymentResult] = useState<PaymentResultState | null>(null);
@@ -170,6 +172,19 @@ export const FreelanceOrderForm = ({
           title: "Payment Verified! 🎉",
           description: "Payment verification successful.",
           duration: 6000,
+        });
+
+        // Redirect to success page with data
+        navigate("/payment-success", {
+          state: {
+            paymentResult: {
+              verified: true,
+              razorpayOrderId: data.payment.orderId || orderId,
+              razorpayPaymentId: data.payment.paymentId || paymentId,
+            },
+            formData: form.getValues(),
+            selectedService: services.find(s => s.title === serviceName) || { title: serviceName, numericPrice: amountInRupees },
+          }
         });
       } else {
         setPaymentResult({

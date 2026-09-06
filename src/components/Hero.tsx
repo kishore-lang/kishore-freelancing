@@ -39,14 +39,12 @@ export const Hero = () => {
           animate="visible"
           className="space-y-4 sm:space-y-6 text-center md:text-left"
         >
-          <motion.div variants={itemVariants}>
-            <motion.span
-              className="text-primary text-xs sm:text-sm md:text-base font-mono"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              &lt;Hello World /&gt;
-            </motion.span>
+          <motion.div variants={itemVariants} className="mb-4">
+            <img 
+              src="https://i.ibb.co/Jj0642Cg/Chat-GPT-Image-Sep-6-2026-12-31-25-PM.png" 
+              alt="K Freelancing Logo" 
+              className="w-24 sm:w-32 md:w-40 rounded-2xl mx-auto md:mx-0 shadow-2xl border border-white/10"
+            />
           </motion.div>
 
           <motion.h1
@@ -54,18 +52,17 @@ export const Hero = () => {
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight"
           >
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-             KISHORE
+             K FREELANCING
             </span>
             <br />
-            <span className="text-foreground">JAGADESAN</span>
+            <span className="text-foreground">AGENCY</span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
             className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-lg mx-auto md:mx-0"
           >
-            Crafting beautiful, performant web experiences with modern
-            technologies and creative problem-solving.
+            We build advanced, premium, and highly scalable web applications. Transform your digital presence with professional design and robust engineering.
           </motion.p>
 
           <motion.div
@@ -76,10 +73,10 @@ export const Hero = () => {
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-background font-semibold shadow-[0_0_20px_rgba(0,240,255,0.5)] hover:shadow-[0_0_30px_rgba(0,240,255,0.7)] text-sm sm:text-base"
-                onClick={handleResumeDownload}
+                onClick={() => window.location.href = '/freelancing'}
               >
-                <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Download Resume
+                <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                View Our Services
               </Button>
             </motion.div>
 
@@ -88,10 +85,9 @@ export const Hero = () => {
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto border-primary/50 text-primary hover:bg-primary/10 text-sm sm:text-base"
-                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => window.location.href = '/our-work'}
               >
-                View Projects
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                View Our Work
               </Button>
             </motion.div>
           </motion.div>

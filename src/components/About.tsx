@@ -45,7 +45,7 @@ export const About = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2 }}
           >
-            About <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Me</span>
+            About <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Us</span>
           </motion.h2>
 
           <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
@@ -70,26 +70,26 @@ export const About = () => {
                   />
                   <div className="absolute inset-2 bg-background rounded-full flex items-center justify-center overflow-hidden">
                     <img
-                      src="https://i.ibb.co/whhMXRhK/IMG-2374.jpg"
-                      alt="Profile"
-                      className="w-full h-full object-cover rounded-full"
+                      src="https://i.ibb.co/Jj0642Cg/Chat-GPT-Image-Sep-6-2026-12-31-25-PM.png"
+                      alt="K Freelancing Logo"
+                      className="w-full h-full object-cover rounded-full p-2 bg-black"
                     />
                   </div>
                 </div>
 
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
-                Hi, I’m Kishore J, a passionate 3rd-year B.E. Computer Science and Engineering student at Sri Krishna College of Technology (SKCT), Coimbatore.
-                I love building interactive, visually engaging, and high-performance web applications. My interests revolve around Frontend Development, Creative UI/UX and modern JavaScript frameworks.
+                We are K Freelancing, a premier web development agency specializing in high-performance digital solutions. 
+                Our team is dedicated to building scalable, interactive, and visually stunning web applications that elevate your brand and drive business growth. 
+                From modern Frontend UI/UX to robust Backend architectures, we deliver excellence at every step.
                 </p>
 
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     size="lg"
                     className="w-full bg-gradient-to-r from-primary to-secondary text-background font-semibold shadow-[0_0_20px_rgba(0,240,255,0.5)] text-sm sm:text-base"
-                    onClick={handleResumeDownload}
+                    onClick={() => window.location.href = '/freelancing'}
                   >
-                    <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                   Resume at a Glance
+                   Explore Our Services
                   </Button>
                 </motion.div>
               </div>
@@ -103,59 +103,22 @@ export const About = () => {
             >
               <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center md:text-left">Skills & Expertise</h3>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Frontend & 3D */}
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Frontend & 3D</h4>
-                  {frontendSkills.map((skill, index) => (
-                    <motion.div
-                      key={skill.name}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ delay: 0.8 + index * 0.08 }}
-                      className="space-y-2 mb-3"
-                    >
-                      <div className="flex justify-between text-xs sm:text-sm">
-                        <span className="text-foreground">{skill.name}</span>
-                        <span className="text-primary">{skill.level}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-primary to-secondary"
-                          initial={{ width: 0 }}
-                          animate={isInView ? { width: `${skill.level}%` } : {}}
-                          transition={{ duration: 1, delay: 0.8 + index * 0.08 }}
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+                  <h4 className="text-primary font-semibold mb-1">Frontend Dev</h4>
+                  <p className="text-xs text-muted-foreground">React, Next.js, Framer Motion</p>
                 </div>
-
-                {/* Backend */}
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Backend</h4>
-                  {backendSkills.map((skill, index) => (
-                    <motion.div
-                      key={skill.name}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ delay: 0.8 + index * 0.08 }}
-                      className="space-y-2 mb-3"
-                    >
-                      <div className="flex justify-between text-xs sm:text-sm">
-                        <span className="text-foreground">{skill.name}</span>
-                        <span className="text-primary">{skill.level}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-primary to-secondary"
-                          initial={{ width: 0 }}
-                          animate={isInView ? { width: `${skill.level}%` } : {}}
-                          transition={{ duration: 1, delay: 0.8 + index * 0.08 }}
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+                  <h4 className="text-secondary font-semibold mb-1">Backend APIs</h4>
+                  <p className="text-xs text-muted-foreground">Node.js, Express, Spring Boot</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+                  <h4 className="text-accent font-semibold mb-1">Database Design</h4>
+                  <p className="text-xs text-muted-foreground">PostgreSQL, MongoDB</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
+                  <h4 className="text-emerald-400 font-semibold mb-1">Payment Gateways</h4>
+                  <p className="text-xs text-muted-foreground">Razorpay, Stripe</p>
                 </div>
               </div>
             </motion.div>

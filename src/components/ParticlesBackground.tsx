@@ -1,104 +1,53 @@
-import { useEffect, useMemo, useState } from "react";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import { motion } from "framer-motion";
 
 export const ParticlesBackground = () => {
-  const [particleCount, setParticleCount] = useState(80);
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    });
-
-    // Set particle count based on screen size
-    const updateParticleCount = () => {
-      setParticleCount(window.innerWidth < 768 ? 40 : 80);
-    };
-
-    updateParticleCount();
-    window.addEventListener('resize', updateParticleCount);
-
-    return () => {
-      window.removeEventListener('resize', updateParticleCount);
-    };
-  }, []);
-
-  const options = useMemo(() => ({
-        background: {
-          color: {
-            value: "transparent",
-          },
-        },
-        fpsLimit: 120,
-        interactivity: {
-          events: {
-            onClick: {
-              enable: true,
-              mode: "push",
-            },
-            onHover: {
-              enable: true,
-              mode: "repulse",
-            },
-            resize: {
-              enable: true,
-            } as any,
-          },
-          modes: {
-            push: {
-              quantity: 4,
-            },
-            repulse: {
-              distance: 100,
-              duration: 0.4,
-            },
-          },
-        },
-        particles: {
-          color: {
-            value: ["#00f0ff", "#b537f2", "#ff2e97"],
-          },
-          links: {
-            color: "#00f0ff",
-            distance: 150,
-            enable: true,
-            opacity: 0.3,
-            width: 1,
-          },
-          move: {
-            direction: "none" as const,
-            enable: true,
-            outModes: {
-              default: "bounce" as const,
-            },
-            random: false,
-            speed: 1,
-            straight: false,
-          },
-          number: {
-            density: {
-              enable: true,
-            },
-            value: particleCount,
-          },
-          opacity: {
-            value: 0.5,
-          },
-          shape: {
-            type: "circle",
-          },
-          size: {
-            value: { min: 1, max: 3 },
-          },
-        },
-        detectRetina: true,
-  }), [particleCount]);
-
   return (
-    <Particles
-      id="tsparticles"
-      options={options}
-      className="absolute inset-0 -z-10"
-    />
+    <div className="absolute inset-0 -z-10 overflow-hidden bg-[#030712]">
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+          x: [0, 100, 0],
+          y: [0, -50, 0],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/20 blur-[120px]"
+      />
+      <motion.div
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+          x: [0, -100, 0],
+          y: [0, 100, 0],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+        className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full bg-secondary/15 blur-[150px]"
+      />
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.1, 0.3, 0.1],
+          x: [0, 50, 0],
+          y: [0, 50, 0],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 5
+        }}
+        className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] rounded-full bg-accent/20 blur-[100px]"
+      />
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+    </div>
   );
 };

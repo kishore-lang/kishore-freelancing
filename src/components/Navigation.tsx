@@ -9,11 +9,10 @@ export const Navigation = () => {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "About", path: "/#about" },
-    { name: "Projects", path: "/#projects" },
-    { name: "Certifications", path: "/#certifications" },
-    { name: "Freelancing", path: "/freelancing" },
-    { name: "Contact", path: "/#contact" },
+    { name: "About Us", path: "/#about" },
+    { name: "Services", path: "/freelancing" },
+    { name: "Our Work", path: "/our-work" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
@@ -28,7 +27,7 @@ export const Navigation = () => {
           className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
           whileHover={{ scale: 1.05 }}
         >
-          Portfolio
+          K Freelancing
         </motion.a>
 
         {/* Desktop Navigation */}
