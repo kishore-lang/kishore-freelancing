@@ -526,9 +526,8 @@ export const FreelanceOrderForm = ({
 
           {/* Information Banner */}
           <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-muted-foreground">
-            <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-            <p>
-              Submitting will initiate Razorpay Checkout in TEST mode. Payment signatures are cryptographically verified by our Node.js backend.
+            <p className="text-sm text-muted-foreground bg-secondary/30 p-4 rounded-xl border border-secondary/50">
+              Submitting will initiate the Razorpay Checkout process. Payment signatures are cryptographically verified by our Node.js backend.
             </p>
           </div>
 
@@ -591,9 +590,6 @@ export const FreelanceOrderForm = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-1 rounded-full bg-primary/20 text-primary font-mono font-medium">
-                TEST MODE
-              </span>
               {paymentResult.status === "verified_success" && (
                 <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-medium border border-emerald-500/30">
                   HMAC VERIFIED ✓
@@ -643,14 +639,14 @@ export const FreelanceOrderForm = ({
             </p>
           )}
 
-          {/* Placeholder Key Notice */}
-          {paymentResult.isPlaceholderKey && (
-            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
-              <KeyRound className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
-              <div>
-                <strong>Notice:</strong> Using placeholder test keys in <code className="font-mono bg-black/30 px-1 rounded text-amber-200">server/.env</code>.
-                To launch the live interactive Razorpay popup modal, add your free TEST Mode Key ID & Key Secret from <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-amber-100">dashboard.razorpay.com</a>.
-              </div>
+          {/* Notice for placeholder keys */}
+          {paymentResult.razorpayOrderId?.startsWith("order_test_") && (
+            <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
+              <Key className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
+              <p className="text-xs sm:text-sm text-amber-500/90 leading-relaxed">
+                <strong className="font-semibold text-amber-400">Notice:</strong> Using placeholder test keys in <code className="bg-black/30 px-1 py-0.5 rounded">server/.env</code>. 
+                To launch the live interactive Razorpay popup modal, add your Key ID & Key Secret from <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-amber-100">dashboard.razorpay.com</a>.
+              </p>
             </div>
           )}
 
