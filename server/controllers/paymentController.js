@@ -343,6 +343,18 @@ const verifyPayment = async (req, res) => {
             amount: customerDetails?.amount || (amountPaise ? amountPaise / 100 : 0),
           });
 
+          // Trigger Google Sheets automation asynchronously
+          const { appendOrderToSheet } = require("../services/googleSheetsService");
+          appendOrderToSheet({
+            customerName: customerDetails?.full_name || "Customer",
+            customerEmail: customerDetails?.email || null,
+            whatsappNumber: customerDetails?.whatsapp_number || "N/A",
+            serviceName: customerDetails?.service_name || "Freelance Service",
+            amount: customerDetails?.amount || (amountPaise ? amountPaise / 100 : 0),
+            orderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+          });
+
           // Update notification_status in PostgreSQL
           if (notifyResult.success) {
             await client.query(
