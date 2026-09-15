@@ -29,9 +29,18 @@ const initDatabase = async () => {
           id SERIAL PRIMARY KEY,
           service_key VARCHAR(100) UNIQUE NOT NULL,
           service_name VARCHAR(255) NOT NULL,
+          description TEXT,
+          icon VARCHAR(50),
           price NUMERIC(10,2),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+      `);
+      
+      // Ensure existing tables are updated with new columns
+      await client.query(`
+        ALTER TABLE services 
+        ADD COLUMN IF NOT EXISTS description TEXT,
+        ADD COLUMN IF NOT EXISTS icon VARCHAR(50);
       `);
 
       // 3. Table: orders
@@ -91,16 +100,18 @@ const initDatabase = async () => {
 
       // 7. Seed Services (Idempotent seed using ON CONFLICT)
       await client.query(`
-        INSERT INTO services (service_key, service_name, price) VALUES
-        ('portfolio', 'Portfolio Website', 2000.00),
-        ('react', 'React Website', 3000.00),
-        ('ecommerce', 'E-Commerce Website', 8000.00),
-        ('fullstack', 'Full-Stack Web Application', 10000.00),
-        ('api', 'API / Backend Integration', 4000.00),
-        ('test', 'Test Package', 5.00),
-        ('custom', 'Custom Project', NULL)
+        INSERT INTO services (service_key, service_name, description, icon, price) VALUES
+        ('portfolio', 'Portfolio Website', 'Modern responsive portfolio website designed to showcase your skills, projects and professional profile.', 'Globe', 2000.00),
+        ('react', 'React Website', 'Modern responsive React website with clean UI, animations and professional design.', 'Code2', 3000.00),
+        ('ecommerce', 'E-Commerce Website', 'Full e-commerce website with product listing, cart, checkout and payment gateway integration.', 'ShoppingCart', 8000.00),
+        ('fullstack', 'Full-Stack Web Application', 'Custom web application with frontend, backend APIs and database integration.', 'Layers', 10000.00),
+        ('api', 'API / Backend Integration', 'REST API development, third-party API integration and backend functionality.', 'Server', 4000.00),
+        ('test', 'Test Package', 'A 5 Rs package for testing live payments and webhook integration.', 'Zap', 5.00),
+        ('custom', 'Custom Project', 'Have a different requirement? Tell me about your project and let''s discuss it.', 'Sparkles', NULL)
         ON CONFLICT (service_key) DO UPDATE SET
           service_name = EXCLUDED.service_name,
+          description = EXCLUDED.description,
+          icon = EXCLUDED.icon,
           price = EXCLUDED.price;
       `);
 

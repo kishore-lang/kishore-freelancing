@@ -80,6 +80,10 @@ app.use("/api", paymentRoutes);
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
+// Public Service Routes
+const serviceRoutes = require("./routes/serviceRoutes");
+app.use("/api/services", serviceRoutes);
+
 // 404 Handler for Unknown Routes
 app.use((req, res) => {
   res.status(404).json({

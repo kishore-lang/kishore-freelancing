@@ -24,6 +24,8 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalCustomers: 0 });
   const [orders, setOrders] = useState<any[]>([]);
+  const [newProduct, setNewProduct] = useState({ service_name: '', description: '', price: '', icon: 'Sparkles' });
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,6 +88,35 @@ export default function AdminDashboard() {
     sessionStorage.removeItem("adminPassword");
     setIsAuthenticated(false);
     setPassword("");
+  };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProduct.service_name) return;
+    
+    setIsAddingProduct(true);
+    try {
+      const pass = sessionStorage.getItem("adminPassword");
+      const res = await fetch(`${API_BASE_URL}/api/admin/services`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pass}` 
+        },
+        body: JSON.stringify(newProduct)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: "Success", description: "Product added instantly to website!" });
+        setNewProduct({ service_name: '', description: '', price: '', icon: 'Sparkles' });
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error: any) {
+      toast({ title: "Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsAddingProduct(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -241,6 +272,66 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Add Product Form */}
+        <Card className="bg-zinc-900/50 border-zinc-800">
+          <CardHeader>
+            <CardTitle className="text-xl text-white">Add New Product</CardTitle>
+            <p className="text-sm text-zinc-400">Products added here will instantly appear on your website.</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAddProduct} className="space-y-4 max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-300">Service Name</label>
+                  <Input 
+                    required 
+                    placeholder="e.g. SEO Optimization" 
+                    value={newProduct.service_name}
+                    onChange={(e) => setNewProduct({...newProduct, service_name: e.target.value})}
+                    className="bg-black/50 border-zinc-800"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-300">Price (₹)</label>
+                  <Input 
+                    type="number"
+                    placeholder="e.g. 5000" 
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                    className="bg-black/50 border-zinc-800"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-300">Description</label>
+                <Input 
+                  placeholder="Short description of the service..." 
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  className="bg-black/50 border-zinc-800"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-300">Icon Name (Lucide-react)</label>
+                <Input 
+                  placeholder="e.g. Sparkles, Globe, ShoppingCart" 
+                  value={newProduct.icon}
+                  onChange={(e) => setNewProduct({...newProduct, icon: e.target.value})}
+                  className="bg-black/50 border-zinc-800"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                disabled={isAddingProduct}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                {isAddingProduct ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Add Product to Website
+              </Button>
+            </form>
           </CardContent>
         </Card>
 

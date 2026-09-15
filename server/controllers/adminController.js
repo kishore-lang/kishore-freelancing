@@ -83,7 +83,45 @@ const getRecentOrders = async (req, res) => {
   }
 };
 
+/**
+ * Add a new service/product
+ */
+const addService = async (req, res) => {
+  try {
+    const { service_name, description, icon, price } = req.body;
+    
+    if (!service_name) {
+      return res.status(400).json({ success: false, message: "Service name is required" });
+    }
+
+    // Generate a simple key
+    const service_key = service_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    const client = await pool.connect();
+    
+    try {
+      const result = await client.query(`
+        INSERT INTO services (service_key, service_name, description, icon, price)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [service_key, service_name, description || '', icon || 'Sparkles', price || null]);
+
+      res.status(201).json({
+        success: true,
+        message: "Service added successfully",
+        service: result.rows[0]
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error adding service:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 module.exports = {
   getDashboardStats,
-  getRecentOrders
+  getRecentOrders,
+  addService
 };

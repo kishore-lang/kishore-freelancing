@@ -1,90 +1,48 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { ParticlesBackground } from "@/components/ParticlesBackground";
-import { CursorFollower } from "@/components/CursorFollower";
-import { Navigation } from "@/components/Navigation";
-import { ServiceCard, ServiceItem } from "@/components/ServiceCard";
-import { FreelanceOrderForm } from "@/components/FreelanceOrderForm";
-import {
-  Globe,
-  Code2,
-  ShoppingCart,
-  Layers,
-  Server,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { Zap } from "lucide-react";
 
-const FREELANCE_SERVICES: ServiceItem[] = [
-  {
-    id: "portfolio-website",
-    title: "Portfolio Website",
-    description:
-      "Modern responsive portfolio website designed to showcase your skills, projects and professional profile.",
-    price: "₹2,000",
-    numericPrice: 2000,
-    icon: Globe,
-  },
-  {
-    id: "react-website",
-    title: "React Website",
-    description:
-      "Modern responsive React website with clean UI, animations and professional design.",
-    price: "₹3,000",
-    numericPrice: 3000,
-    icon: Code2,
-  },
-  {
-    id: "e-commerce-website",
-    title: "E-Commerce Website",
-    description:
-      "Full e-commerce website with product listing, cart, checkout and payment gateway integration.",
-    price: "₹8,000",
-    numericPrice: 8000,
-    icon: ShoppingCart,
-  },
-  {
-    id: "fullstack-application",
-    title: "Full-Stack Web Application",
-    description:
-      "Custom web application with frontend, backend APIs and database integration.",
-    price: "₹10,000",
-    numericPrice: 10000,
-    icon: Layers,
-  },
-  {
-    id: "api-backend-integration",
-    title: "API / Backend Integration",
-    description:
-      "REST API development, third-party API integration and backend functionality.",
-    price: "₹4,000",
-    numericPrice: 4000,
-    icon: Server,
-  },
-  {
-    id: "test-package",
-    title: "Test Package",
-    description:
-      "A 5 Rs package for testing live payments and webhook integration.",
-    price: "₹5",
-    numericPrice: 5,
-    icon: Zap,
-  },
-  {
-    id: "custom-project",
-    title: "Custom Project",
-    description:
-      "Have a different requirement? Tell me about your project and let's discuss it.",
-    price: "Custom",
-    icon: Sparkles,
-    isCustom: true,
-  },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const Freelancing = () => {
-  const [selectedService, setSelectedService] = useState<ServiceItem | null>(
-    FREELANCE_SERVICES[0]
-  );
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/services`);
+        const data = await res.json();
+        
+        if (data.success && data.services) {
+          const mappedServices = data.services.map((s: any) => {
+            // Dynamically select icon, fallback to Sparkles
+            const IconComponent = (LucideIcons as any)[s.icon] || LucideIcons.Sparkles;
+            
+            return {
+              id: s.service_key,
+              title: s.service_name,
+              description: s.description || "Premium freelance service",
+              price: s.price ? `₹${Number(s.price).toLocaleString()}` : "Custom",
+              numericPrice: s.price ? Number(s.price) : 0,
+              icon: IconComponent,
+              isCustom: !s.price
+            };
+          });
+          setServices(mappedServices);
+          if (mappedServices.length > 0) {
+            setSelectedService(mappedServices[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchServices();
+  }, []);
 
   const handleSelectService = (service: ServiceItem) => {
     setSelectedService(service);
@@ -155,24 +113,33 @@ const Freelancing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {FREELANCE_SERVICES.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                isSelected={selectedService?.id === service.id}
-                onSelect={handleSelectService}
-              />
-            ))}
+            {isLoading ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-20">
+                <LucideIcons.Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-4" />
+                <p className="text-zinc-400">Loading live products...</p>
+              </div>
+            ) : (
+              services.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  isSelected={selectedService?.id === service.id}
+                  onSelect={handleSelectService}
+                />
+              ))
+            )}
           </div>
         </section>
 
         {/* ORDER FORM SECTION */}
         <section className="max-w-4xl mx-auto">
-          <FreelanceOrderForm
-            selectedService={selectedService}
-            services={FREELANCE_SERVICES}
-            onSelectService={setSelectedService}
-          />
+          {services.length > 0 && (
+            <FreelanceOrderForm
+              selectedService={selectedService}
+              services={services}
+              onSelectService={setSelectedService}
+            />
+          )}
         </section>
       </main>
 
