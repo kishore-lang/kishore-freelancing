@@ -6,7 +6,8 @@ const { Resend } = require('resend');
 class EmailService {
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.defaultFrom = 'onboarding@resend.dev'; // Testing sender email
+    // Updated to use the newly purchased domain
+    this.defaultFrom = 'hello@kfreelance.online'; 
   }
 
   /**
