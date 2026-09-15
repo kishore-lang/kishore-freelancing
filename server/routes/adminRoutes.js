@@ -1,5 +1,5 @@
 const express = require("express");
-const { getDashboardStats, getRecentOrders, addService } = require("../controllers/adminController");
+const { getDashboardStats, getRecentOrders, addService, deleteService } = require("../controllers/adminController");
 const router = express.Router();
 
 // Simple middleware to check ADMIN_PASSWORD
@@ -27,6 +27,7 @@ router.use(verifyAdminPassword);
 router.get("/stats", getDashboardStats);
 router.get("/orders", getRecentOrders);
 router.post("/services", addService);
+router.delete("/services/:id", deleteService);
 
 // Simple verify route for the frontend to check if a password is correct
 router.post("/verify-password", (req, res) => {

@@ -12,8 +12,8 @@ import {
   LogOut,
   Loader2,
   CheckCircle2,
-  XCircle,
-  Clock
+  Clock,
+  Trash2
 } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalCustomers: 0 });
   const [orders, setOrders] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [newProduct, setNewProduct] = useState({ service_name: '', description: '', price: '', icon: 'Sparkles' });
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const { toast } = useToast();
@@ -59,6 +60,13 @@ export default function AdminDashboard() {
       
       if (ordersRes.ok && ordersData.orders) {
         setOrders(ordersData.orders);
+      }
+
+      // 3. Fetch Services
+      const servicesRes = await fetch(`${API_BASE_URL}/api/services`);
+      const servicesData = await servicesRes.json();
+      if (servicesRes.ok && servicesData.services) {
+        setServices(servicesData.services);
       }
 
       // Success
@@ -109,6 +117,12 @@ export default function AdminDashboard() {
       if (res.ok) {
         toast({ title: "Success", description: "Product added instantly to website!" });
         setNewProduct({ service_name: '', description: '', price: '', icon: 'Sparkles' });
+        // Refresh services
+        const servicesRes = await fetch(`${API_BASE_URL}/api/services`);
+        const servicesData = await servicesRes.json();
+        if (servicesRes.ok && servicesData.services) {
+          setServices(servicesData.services);
+        }
       } else {
         throw new Error(data.message);
       }
@@ -116,6 +130,27 @@ export default function AdminDashboard() {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
     } finally {
       setIsAddingProduct(false);
+    }
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this product? It will be removed from your website.")) return;
+    
+    try {
+      const pass = sessionStorage.getItem("adminPassword");
+      const res = await fetch(`${API_BASE_URL}/api/admin/services/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${pass}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: "Success", description: "Product deleted from website." });
+        setServices(services.filter(s => s.id !== id));
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error: any) {
+      toast({ title: "Failed to Delete", description: error.message, variant: "destructive" });
     }
   };
 
@@ -332,6 +367,29 @@ export default function AdminDashboard() {
                 Add Product to Website
               </Button>
             </form>
+
+            <div className="mt-8 border-t border-zinc-800 pt-6">
+              <h3 className="text-lg font-medium text-white mb-4">Current Products</h3>
+              <div className="space-y-3">
+                {services.map(service => (
+                  <div key={service.id} className="flex items-center justify-between p-4 rounded-lg border border-zinc-800 bg-black/40">
+                    <div>
+                      <div className="font-medium text-white">{service.service_name}</div>
+                      <div className="text-sm text-zinc-500">₹{service.price || 'Custom'} • {service.icon}</div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDeleteProduct(service.id)}
+                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                {services.length === 0 && <div className="text-sm text-zinc-500">No products found.</div>}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
