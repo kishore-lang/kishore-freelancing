@@ -13,7 +13,7 @@ const verifyAdminPassword = (req, res, next) => {
 
   // Get password from header
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== \`Bearer \${adminPassword}\`) {
+  if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
     return res.status(401).json({ success: false, message: "Unauthorized: Invalid password" });
   }
 
