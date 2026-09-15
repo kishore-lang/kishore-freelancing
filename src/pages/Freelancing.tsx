@@ -1,3 +1,10 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ParticlesBackground } from "@/components/ParticlesBackground";
+import { CursorFollower } from "@/components/CursorFollower";
+import { Navigation } from "@/components/Navigation";
+import { ServiceCard, ServiceItem } from "@/components/ServiceCard";
+import { FreelanceOrderForm } from "@/components/FreelanceOrderForm";
 import * as LucideIcons from "lucide-react";
 import { Zap } from "lucide-react";
 
