@@ -88,6 +88,10 @@ app.use("/api/services", serviceRoutes);
 const contactRoutes = require("./routes/contactRoutes");
 app.use("/api/contact", contactRoutes);
 
+// User Routes
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
+
 // 404 Handler for Unknown Routes
 app.use((req, res) => {
   res.status(404).json({

@@ -64,6 +64,7 @@ interface FreelanceOrderFormProps {
   selectedService: ServiceItem | null;
   services: ServiceItem[];
   onSelectService: (service: ServiceItem) => void;
+  user?: { fullName: string; email: string; whatsappNumber: string } | null;
 }
 
 interface PaymentResultState {
@@ -80,6 +81,7 @@ export const FreelanceOrderForm = ({
   selectedService,
   services,
   onSelectService,
+  user
 }: FreelanceOrderFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -92,9 +94,9 @@ export const FreelanceOrderForm = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      whatsappNumber: "",
+      fullName: user?.fullName || "",
+      email: user?.email || "",
+      whatsappNumber: user?.whatsappNumber || "",
       selectedService: selectedService?.title || "",
       projectRequirements: "",
       customAmount: "",

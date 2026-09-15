@@ -7,6 +7,7 @@ import { ServiceItem } from "@/components/ServiceCard";
 import * as LucideIcons from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -14,6 +15,7 @@ export default function Booking() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const serviceId = searchParams.get("serviceId");
+  const { user } = useAuthStore();
   
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -94,6 +96,7 @@ export default function Booking() {
               selectedService={selectedService} 
               services={services} 
               onSelectService={setSelectedService} 
+              user={user}
             />
           </div>
         </motion.div>
