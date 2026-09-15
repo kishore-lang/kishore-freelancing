@@ -1,12 +1,6 @@
 import { motion } from "framer-motion";
-import { Scene3D } from "./Scene3D";
-import { Download, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
-
-const handleResumeDownload = () => {
-  // Updated to use the correct file name
-  window.open("/kishore_cv%20(3).pdf", "_blank", "noopener,noreferrer");
-};
 
 export const Hero = () => {
   const containerVariants = {
@@ -31,7 +25,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-20 md:pt-0">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 md:gap-12 items-center z-10">
         <motion.div
           variants={containerVariants}
@@ -41,38 +35,38 @@ export const Hero = () => {
         >
           <motion.div variants={itemVariants} className="mb-4">
             <img 
-              src="https://i.ibb.co/Jj0642Cg/Chat-GPT-Image-Sep-6-2026-12-31-25-PM.png" 
+              src="/logo.jpg" 
               alt="K Freelancing Logo" 
-              className="w-24 sm:w-32 md:w-40 rounded-2xl mx-auto md:mx-0 shadow-2xl border border-white/10"
+              className="w-24 sm:w-32 md:w-40 rounded-xl mx-auto md:mx-0 shadow-lg border border-black/5"
             />
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-tight tracking-tighter"
           >
-            <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            <span className="text-black">
              K FREELANCING
             </span>
             <br />
-            <span className="text-foreground">AGENCY</span>
+            <span className="text-red-600">AGENCY</span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-lg mx-auto md:mx-0"
+            className="text-base sm:text-lg md:text-xl text-zinc-600 max-w-lg mx-auto md:mx-0 font-medium"
           >
             We build advanced, premium, and highly scalable web applications. Transform your digital presence with professional design and robust engineering.
           </motion.p>
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center md:justify-start"
+            className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center md:justify-start pt-4"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-background font-semibold shadow-[0_0_20px_rgba(0,240,255,0.5)] hover:shadow-[0_0_30px_rgba(0,240,255,0.7)] text-sm sm:text-base"
+                className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold shadow-xl shadow-red-600/20 text-sm sm:text-base rounded-none"
                 onClick={() => window.location.href = '/freelancing'}
               >
                 <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -80,11 +74,11 @@ export const Hero = () => {
               </Button>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto border-primary/50 text-primary hover:bg-primary/10 text-sm sm:text-base"
+                className="w-full sm:w-auto border-black text-black hover:bg-black hover:text-white font-bold text-sm sm:text-base rounded-none transition-colors"
                 onClick={() => window.location.href = '/our-work'}
               >
                 View Our Work
@@ -94,19 +88,14 @@ export const Hero = () => {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] relative hidden md:block"
+          transition={{ duration: 1, delay: 0.3 }}
+          className="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[700px] relative hidden md:flex items-center justify-center"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-3xl" />
-          <Scene3D />
+          <img src="/web_dev.jpg" alt="Web Development" className="object-cover w-full h-full rounded-2xl shadow-2xl" />
         </motion.div>
       </div>
-
-      {/* Animated gradient orbs - smaller on mobile */}
-      <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 bg-primary/20 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
     </section>
   );
 };

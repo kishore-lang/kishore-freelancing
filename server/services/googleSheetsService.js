@@ -73,6 +73,65 @@ const appendOrderToSheet = async (orderData) => {
   }
 };
 
+const appendContactToSheet = async (contactData) => {
+  try {
+    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    if (!sheetId || !clientEmail || !privateKey) {
+      console.warn("[Google Sheets] Missing credentials. Skipping contact logging.");
+      return { success: false, message: "Missing credentials" };
+    }
+
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    const serviceAccountAuth = new JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+    await doc.loadInfo(); 
+    
+    // Try to get sheet named 'Contacts', if not get the second sheet or create it
+    let contactSheet = doc.sheetsByTitle['Contacts'];
+    if (!contactSheet) {
+      if (doc.sheetCount > 1) {
+        contactSheet = doc.sheetsByIndex[1];
+      } else {
+        contactSheet = await doc.addSheet({ title: 'Contacts' });
+      }
+    }
+
+    try {
+      await contactSheet.setHeaderRow(['Date', 'Name', 'Email', 'Message']);
+    } catch (e) {}
+
+    const {
+      name = "N/A",
+      email = "N/A",
+      message = "N/A",
+    } = contactData;
+
+    await contactSheet.addRow({
+      'Date': new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      'Name': name,
+      'Email': email,
+      'Message': message,
+    });
+
+    console.log(`[Google Sheets] Successfully appended contact from ${email}`);
+    return { success: true };
+
+  } catch (error) {
+    console.error("[Google Sheets] Error appending contact to sheet:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
-  appendOrderToSheet
+  appendOrderToSheet,
+  appendContactToSheet
 };

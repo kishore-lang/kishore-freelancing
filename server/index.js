@@ -84,6 +84,10 @@ app.use("/api/admin", adminRoutes);
 const serviceRoutes = require("./routes/serviceRoutes");
 app.use("/api/services", serviceRoutes);
 
+// Contact Route
+const contactRoutes = require("./routes/contactRoutes");
+app.use("/api/contact", contactRoutes);
+
 // 404 Handler for Unknown Routes
 app.use((req, res) => {
   res.status(404).json({

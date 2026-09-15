@@ -19,15 +19,18 @@ export const Navigation = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10"
+      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-black/10 shadow-sm"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         <motion.a
           href="/"
-          className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
+          className="flex items-center gap-2"
           whileHover={{ scale: 1.05 }}
         >
-          K Freelancing
+          <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-sm" />
+          <span className="text-xl sm:text-2xl font-black text-black">
+            K <span className="text-red-600">Freelancing</span>
+          </span>
         </motion.a>
 
         {/* Desktop Navigation */}
@@ -36,7 +39,7 @@ export const Navigation = () => {
             <motion.a
               key={item.name}
               href={item.path}
-              className="relative text-sm lg:text-base text-foreground/80 hover:text-foreground transition-colors"
+              className="relative text-sm lg:text-base font-bold text-black/70 hover:text-red-600 transition-colors"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -44,21 +47,19 @@ export const Navigation = () => {
             >
               {item.name}
               <motion.div
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"
                 initial={{ scaleX: 0 }}
                 whileHover={{ scaleX: 1 }}
                 transition={{ duration: 0.2 }}
               />
             </motion.a>
           ))}
-          <ThemeToggle />
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
           <button
-            className="text-foreground p-2 hover:bg-foreground/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+            className="text-black p-2 hover:bg-black/5 rounded-lg transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -73,14 +74,14 @@ export const Navigation = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden glass-card border-t border-white/10"
+          className="md:hidden bg-white border-t border-black/10 shadow-lg"
         >
           <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col gap-3">
             {navItems.map((item) => (
               <a
                 key={item.name}
                 href={item.path}
-                className="text-base text-foreground/80 hover:text-foreground transition-colors py-2 border-b border-white/5 last:border-0"
+                className="text-base font-bold text-black/80 hover:text-red-600 transition-colors py-2 border-b border-black/5 last:border-0"
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}

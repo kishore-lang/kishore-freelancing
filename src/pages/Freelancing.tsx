@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ParticlesBackground } from "@/components/ParticlesBackground";
-import { CursorFollower } from "@/components/CursorFollower";
 import { Navigation } from "@/components/Navigation";
 import { ServiceCard, ServiceItem } from "@/components/ServiceCard";
 import { FreelanceOrderForm } from "@/components/FreelanceOrderForm";
@@ -23,9 +21,7 @@ const Freelancing = () => {
         
         if (data.success && data.services) {
           const mappedServices = data.services.map((s: any) => {
-            // Dynamically select icon, fallback to Sparkles
             const IconComponent = (LucideIcons as any)[s.icon] || LucideIcons.Sparkles;
-            
             return {
               id: s.service_key,
               title: s.service_name,
@@ -60,9 +56,7 @@ const Freelancing = () => {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <ParticlesBackground />
-      <CursorFollower />
+    <div className="relative min-h-screen bg-black text-white">
       <Navigation />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
@@ -72,9 +66,9 @@ const Freelancing = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-primary/30 mb-6 text-xs sm:text-sm font-medium text-primary"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none border border-red-600 mb-6 text-xs sm:text-sm font-bold text-red-600 bg-red-600/10"
           >
-            <Zap className="w-4 h-4 text-primary animate-pulse" />
+            <Zap className="w-4 h-4 text-red-600 animate-pulse" />
             <span>Available for Hire & Custom Projects</span>
           </motion.div>
 
@@ -82,10 +76,10 @@ const Freelancing = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 tracking-tight"
           >
-            <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Freelance Services
+            <span className="text-white">
+              Freelance <span className="text-red-600">Services</span>
             </span>
           </motion.h1>
 
@@ -93,7 +87,7 @@ const Freelancing = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground/90 mb-4"
+            className="text-lg sm:text-xl md:text-2xl font-bold text-zinc-300 mb-4"
           >
             Let's build something amazing together.
           </motion.p>
@@ -102,59 +96,52 @@ const Freelancing = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-sm sm:text-base text-muted-foreground leading-relaxed"
+            className="text-sm sm:text-base text-zinc-400 font-medium max-w-2xl mx-auto"
           >
-            Select a service package below to suit your project needs or specify custom requirements. Submit your details to request an order.
+            From stunning Landing Pages to complex Fullstack Applications. Choose a service below, check out the pricing, and let's get your project started.
           </motion.p>
         </section>
 
-        {/* SERVICES CARDS GRID */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Select a Package
-            </h2>
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              6 Packages Available
-            </span>
+        {/* SERVICES GRID */}
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {isLoading ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-20">
-                <LucideIcons.Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-4" />
-                <p className="text-zinc-400">Loading live products...</p>
-              </div>
-            ) : (
-              services.map((service) => (
+        ) : (
+          <section className="mb-24">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {services.map((service, index) => (
                 <ServiceCard
                   key={service.id}
                   service={service}
+                  index={index}
+                  onSelect={() => handleSelectService(service)}
                   isSelected={selectedService?.id === service.id}
-                  onSelect={handleSelectService}
                 />
-              ))
-            )}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ORDER FORM SECTION */}
-        <section className="max-w-4xl mx-auto">
-          {services.length > 0 && (
-            <FreelanceOrderForm
-              selectedService={selectedService}
-              services={services}
-              onSelectService={setSelectedService}
-            />
-          )}
+        <section id="order-form-section" className="max-w-4xl mx-auto scroll-mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="text-center mb-10">
+              <h2 className="text-3xl sm:text-4xl font-black mb-4">Start Your <span className="text-red-600">Project</span></h2>
+              <p className="text-zinc-400 font-medium">Fill out the form below and we will get back to you within 24 hours.</p>
+            </div>
+            
+            <div className="bg-zinc-900 border border-zinc-800 p-6 sm:p-8 md:p-10 shadow-2xl">
+              <FreelanceOrderForm initialService={selectedService} />
+            </div>
+          </motion.div>
         </section>
       </main>
-
-      <footer className="py-6 sm:py-8 text-center text-muted-foreground border-t border-white/10 px-4">
-        <p className="text-xs sm:text-sm">
-          © 2024 Portfolio. Built with React, Three.js & Framer Motion
-        </p>
-      </footer>
     </div>
   );
 };

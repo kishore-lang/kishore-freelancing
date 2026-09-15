@@ -1,15 +1,11 @@
-import { ParticlesBackground } from "@/components/ParticlesBackground";
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Social } from "@/components/Social";
-import { CursorFollower } from "@/components/CursorFollower";
 
 const Index = () => {
   return (
     <div className="relative min-h-screen">
-      <ParticlesBackground />
-      <CursorFollower />
       <Navigation />
       
       <main>
