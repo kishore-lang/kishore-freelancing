@@ -73,17 +73,6 @@ export const Hero = () => {
                 View Our Services
               </Button>
             </motion.div>
-
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto border-black text-black hover:bg-black hover:text-white font-bold text-sm sm:text-base rounded-none transition-colors"
-                onClick={() => window.location.href = '/our-work'}
-              >
-                View Our Work
-              </Button>
-            </motion.div>
           </motion.div>
         </motion.div>
 

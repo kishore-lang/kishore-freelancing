@@ -6,8 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Freelancing from "./pages/Freelancing";
+import Booking from "./pages/Booking";
 import PaymentSuccess from "./pages/PaymentSuccess";
-import OurWork from "./pages/OurWork";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -25,7 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/freelancing" element={<Freelancing />} />
-            <Route path="/our-work" element={<OurWork />} />
+            <Route path="/booking" element={<Booking />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/admin" element={<Admin />} />

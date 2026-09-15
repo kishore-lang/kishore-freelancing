@@ -123,24 +123,6 @@ const Freelancing = () => {
           </section>
         )}
 
-        {/* ORDER FORM SECTION */}
-        <section id="order-form-section" className="max-w-4xl mx-auto scroll-mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="text-center mb-10">
-              <h2 className="text-3xl sm:text-4xl font-black mb-4">Start Your <span className="text-red-600">Project</span></h2>
-              <p className="text-zinc-400 font-medium">Fill out the form below and we will get back to you within 24 hours.</p>
-            </div>
-            
-            <div className="bg-zinc-900 border border-zinc-800 p-6 sm:p-8 md:p-10 shadow-2xl">
-              <FreelanceOrderForm initialService={selectedService} />
-            </div>
-          </motion.div>
-        </section>
       </main>
     </div>
   );

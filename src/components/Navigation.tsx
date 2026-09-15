@@ -11,8 +11,7 @@ export const Navigation = () => {
     { name: "Home", path: "/" },
     { name: "About Us", path: "/#about" },
     { name: "Services", path: "/freelancing" },
-    { name: "Our Work", path: "/our-work" },
-    { name: "Contact", path: "/contact" },
+    { name: "Contact", path: "/#contact" },
   ];
 
   return (
