@@ -81,17 +81,26 @@ const sendMetaWhatsAppMessage = async (paymentData) => {
 
   const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
 
-  // Use a plain text message for maximum compatibility.
-  // Template messages require pre-approval in Meta Business Manager.
-  // Once a template named "payment_success" is approved, switch to template mode.
+  // Use approved template message for delivery.
+  // Meta's test numbers only deliver template messages, not free-form text.
   const messageBody = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: normalizedNumber,
-    type: "text",
-    text: {
-      preview_url: false,
-      body: `✅ Payment Successful\n\nHi ${customerName},\n\nYour payment of ₹${amount} for ${serviceName} has been successfully received.\n\nOrder ID: ${orderId}\n\nThank you for choosing Kishore Freelance Services.`,
+    type: "template",
+    template: {
+      name: "jaspers_market_order_confirmation_v1",
+      language: { code: "en_US" },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            { type: "text", text: customerName },
+            { type: "text", text: `${orderId} (₹${amount} - ${serviceName})` },
+            { type: "text", text: "3-5 business days" },
+          ],
+        },
+      ],
     },
   };
 
