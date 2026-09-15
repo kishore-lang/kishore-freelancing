@@ -16,28 +16,36 @@ export default function Booking() {
   const serviceId = searchParams.get("serviceId");
   
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+  const [services, setServices] = useState<ServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchService = async () => {
+    const fetchServices = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/services`);
         const data = await res.json();
         
         if (data.success && data.services) {
-          const serviceData = data.services.find((s: any) => s.service_key === serviceId);
-          
-          if (serviceData) {
-            const IconComponent = (LucideIcons as any)[serviceData.icon] || LucideIcons.Sparkles;
-            setSelectedService({
-              id: serviceData.service_key,
-              title: serviceData.service_name,
-              description: serviceData.description,
-              price: serviceData.price ? `₹${Number(serviceData.price).toLocaleString()}` : "Custom",
-              numericPrice: serviceData.price ? Number(serviceData.price) : 0,
+          const mappedServices = data.services.map((s: any) => {
+            const IconComponent = (LucideIcons as any)[s.icon] || LucideIcons.Sparkles;
+            return {
+              id: s.service_key,
+              title: s.service_name,
+              description: s.description || "Premium freelance service",
+              price: s.price ? `₹${Number(s.price).toLocaleString()}` : "Custom",
+              numericPrice: s.price ? Number(s.price) : 0,
               icon: IconComponent,
-              isCustom: !serviceData.price
-            });
+              isCustom: !s.price
+            };
+          });
+          
+          setServices(mappedServices);
+          
+          const matchedService = mappedServices.find((s: ServiceItem) => s.id === serviceId);
+          if (matchedService) {
+            setSelectedService(matchedService);
+          } else if (mappedServices.length > 0) {
+            setSelectedService(mappedServices[0]);
           }
         }
       } catch (error) {
@@ -47,7 +55,7 @@ export default function Booking() {
       }
     };
     
-    fetchService();
+    fetchServices();
   }, [serviceId]);
 
   return (
@@ -82,7 +90,11 @@ export default function Booking() {
           </div>
           
           <div className="bg-zinc-50 border border-black/10 p-6 sm:p-8 md:p-10 shadow-2xl">
-            <FreelanceOrderForm initialService={selectedService} />
+            <FreelanceOrderForm 
+              selectedService={selectedService} 
+              services={services} 
+              onSelectService={setSelectedService} 
+            />
           </div>
         </motion.div>
       </main>
