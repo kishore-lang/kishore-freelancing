@@ -76,6 +76,10 @@ app.get("/api/razorpay/status", (req, res) => {
 // Payment Routes (POST /api/create-order, POST /api/verify-payment, POST /api/webhook/razorpay)
 app.use("/api", paymentRoutes);
 
+// Admin Routes (Protected)
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
 // 404 Handler for Unknown Routes
 app.use((req, res) => {
   res.status(404).json({

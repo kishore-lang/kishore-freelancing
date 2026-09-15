@@ -11,6 +11,8 @@ import OurWork from "./pages/OurWork";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
+import Admin from "./pages/Admin";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -26,6 +28,7 @@ const App = () => (
             <Route path="/our-work" element={<OurWork />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
