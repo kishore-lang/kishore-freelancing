@@ -206,13 +206,21 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-zinc-400 mt-1">Overview of your freelance business</p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleLogout}
-            className="border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800"
-          >
-            <LogOut className="w-4 h-4 mr-2" /> Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => window.location.href = "/admin/invoice"}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold"
+            >
+              Invoice Generator
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800"
+            >
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}

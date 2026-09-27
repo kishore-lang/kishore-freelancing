@@ -37,40 +37,77 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       setFullName("");
       setEmail("");
       setLoading(false);
-    } else {
-      // Initialize recaptcha when modal opens
-      if (!window.recaptchaVerifier) {
+      if (window.recaptchaVerifier) {
         try {
-          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => {
-              // reCAPTCHA solved
-            }
-          });
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = undefined;
         } catch (e) {
-          console.error("Recaptcha error", e);
+          console.error("Error clearing recaptcha", e);
         }
       }
     }
   }, [isOpen]);
 
+  const initRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {}
+      });
+    }
+    return window.recaptchaVerifier;
+  };
+
   const handleSendOtp = async () => {
-    if (phone.length < 10) {
-      toast({ title: "Invalid Phone Number", variant: "destructive" });
+    const rawDigits = phone.replace(/\D/g, "");
+    if (rawDigits.length < 10) {
+      toast({ title: "Invalid Phone Number", description: "Please enter a valid 10-digit phone number.", variant: "destructive" });
       return;
     }
     
     setLoading(true);
     try {
-      const formattedPhone = phone.startsWith("+") ? phone : `+91${phone}`;
-      const appVerifier = window.recaptchaVerifier;
+      // Ensure phone is in E.164 format (+91XXXXXXXXXX)
+      const formattedPhone = phone.trim().startsWith("+") 
+        ? `+${phone.replace(/\D/g, "")}` 
+        : `+91${rawDigits.slice(-10)}`;
+
+      const appVerifier = initRecaptcha();
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(confirmation);
       setStep("otp");
-      toast({ title: "OTP Sent!", description: "Check your messages." });
+      toast({ title: "OTP Sent!", description: `OTP sent to ${formattedPhone}` });
     } catch (error: any) {
-      console.error(error);
-      toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
+      console.error("Firebase Phone Auth Error:", error);
+      // Reset recaptcha on error so user can retry
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.render().then((widgetId: any) => {
+            if (typeof grecaptcha !== 'undefined') grecaptcha.reset(widgetId);
+          });
+        } catch (e) {}
+      }
+      
+      let msg = error.message || "Failed to send SMS";
+      if (error.code === "auth/argument-error" || error.message?.includes("argument-error")) {
+        msg = "Firebase Config Keys are missing or invalid.";
+      } else if (error.code === "auth/api-key-not-valid" || error.message?.includes("api-key-not-valid")) {
+        msg = "Your VITE_FIREBASE_API_KEY is invalid.";
+      } else if (error.code === "auth/invalid-phone-number") {
+        msg = "Invalid phone number format.";
+      } else if (error.code === "auth/quota-exceeded") {
+        msg = "Daily SMS limit (10 SMS/day) reached on Firebase Free Plan. Please use a Test Phone Number or upgrade Firebase.";
+      } else if (error.code === "auth/too-many-requests") {
+        msg = "Too many SMS requests. Please try again later or use a Test Phone Number.";
+      } else if (error.code === "auth/captcha-check-failed") {
+        msg = "reCAPTCHA verification failed. Please refresh and try again.";
+      }
+      
+      toast({ 
+        title: `Error: ${error.code || 'auth/failed'}`, 
+        description: msg, 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
