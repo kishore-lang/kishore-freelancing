@@ -1,5 +1,4 @@
-﻿import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,8 +40,8 @@ export default function AdminDashboard() {
       if (!token) throw new Error("No token found");
 
       // 1. Verify Password & Fetch Stats
-      const statsRes = await fetch(${API_BASE_URL}/api/admin/stats, {
-        headers: { Authorization: Bearer \ }
+      const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       const statsData = await statsRes.json();
@@ -54,8 +53,8 @@ export default function AdminDashboard() {
       setStats(statsData.stats);
       
       // 2. Fetch Orders
-      const ordersRes = await fetch(${API_BASE_URL}/api/admin/orders, {
-        headers: { Authorization: Bearer \ }
+      const ordersRes = await fetch(`${API_BASE_URL}/api/admin/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       const ordersData = await ordersRes.json();
       
@@ -64,7 +63,7 @@ export default function AdminDashboard() {
       }
 
       // 3. Fetch Services
-      const servicesRes = await fetch(${API_BASE_URL}/api/services);
+      const servicesRes = await fetch(`${API_BASE_URL}/api/services`);
       const servicesData = await servicesRes.json();
       if (servicesRes.ok && servicesData.services) {
         setServices(servicesData.services);
@@ -85,11 +84,11 @@ export default function AdminDashboard() {
     setIsAddingProduct(true);
     try {
       const token = await getToken();
-      const res = await fetch(${API_BASE_URL}/api/admin/services, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/services`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: Bearer \
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(newProduct)
       });
@@ -114,9 +113,9 @@ export default function AdminDashboard() {
     
     try {
       const token = await getToken();
-      const res = await fetch(${API_BASE_URL}/api/admin/services/\, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/services/${id}`, {
         method: "DELETE",
-        headers: { Authorization: Bearer \ }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       
@@ -315,7 +314,7 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="py-4">
-                              <span className={inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \}>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                                 {order.status === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1" />}
                                 {order.status.toUpperCase()}
                               </span>
