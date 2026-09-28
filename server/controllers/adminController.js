@@ -1,4 +1,17 @@
 const { pool } = require("../config/database");
+const { getRedisClient } = require("../config/redis");
+
+const clearServiceCache = async () => {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      await redis.del("services_cache");
+      console.log("[Redis] Cleared services cache because data changed.");
+    } catch(e) {
+      console.error("[Redis] Failed to clear cache", e);
+    }
+  }
+};
 
 /**
  * Get high-level stats for the admin dashboard
@@ -106,6 +119,7 @@ const addService = async (req, res) => {
         RETURNING *
       `, [service_key, service_name, description || '', icon || 'Sparkles', price || null]);
 
+      await clearServiceCache();
       res.status(201).json({
         success: true,
         message: "Service added successfully",
@@ -136,11 +150,13 @@ const deleteService = async (req, res) => {
         return res.status(404).json({ success: false, message: "Service not found" });
       }
 
+      await clearServiceCache();
       res.status(200).json({ success: true, message: "Service deleted successfully" });
     } catch (error) {
       if (error.code === '23503') { 
         // PostgreSQL foreign_key_violation: Fallback to soft delete
         await client.query('UPDATE services SET is_active = FALSE WHERE id = $1', [id]);
+        await clearServiceCache();
         return res.status(200).json({ 
           success: true, 
           message: "Product hidden from website (soft-deleted to preserve existing customer order history)." 
