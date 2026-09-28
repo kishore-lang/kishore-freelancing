@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { ClerkProvider, SignIn, useAuth } from "@clerk/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,10 +35,15 @@ interface InvoiceItem {
   rate: number;
 }
 
-export default function InvoiceGenerator() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passcode, setPasscode] = useState("");
-  const { toast } = useToast();
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+export default function InvoiceGeneratorWrapper() {
+  if (!PUBLISHABLE_KEY) return <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">Missing VITE_CLERK_PUBLISHABLE_KEY</div>;
+  return <ClerkProvider publishableKey={PUBLISHABLE_KEY}><InvoiceGenerator /></ClerkProvider>;
+}
+
+function InvoiceGenerator() {
+      const { toast } = useToast();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -79,31 +85,6 @@ export default function InvoiceGenerator() {
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<number>(5000);
   const [notes, setNotes] = useState("Thank you for your business! Please scan the UPI QR code to pay the balance amount.");
-
-  // Check existing admin session
-  useState(() => {
-    const savedPassword = sessionStorage.getItem("adminPassword");
-    if (savedPassword) {
-      setIsAuthenticated(true);
-    }
-  });
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const savedPassword = sessionStorage.getItem("adminPassword");
-    if (
-      passcode === savedPassword || 
-      passcode === "KishoreAdmin123" || 
-      passcode === "admin123" || 
-      passcode === "kishore2026"
-    ) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("adminPassword", passcode);
-      toast({ title: "Access Granted", description: "Welcome to Private Invoice Generator" });
-    } else {
-      toast({ title: "Access Denied", description: "Invalid passcode", variant: "destructive" });
-    }
-  };
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), description: "", qty: 1, rate: 0 }]);
@@ -192,14 +173,14 @@ Thank you for your business!`;
     toast({ title: "Sending Automated Email...", description: `Sending invoice directly to ${customerEmail}` });
 
     try {
-      const pass = sessionStorage.getItem("adminPassword") || "KishoreAdmin123";
+      const token = await getToken();
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
       const res = await fetch(`${API_BASE_URL}/api/admin/send-invoice-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${pass}`
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           customerEmail,
@@ -244,35 +225,8 @@ Thank you for your business!`;
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
-          <CardHeader className="text-center space-y-2">
-            <div className="w-12 h-12 bg-red-600/10 text-red-500 rounded-full flex items-center justify-center mx-auto">
-              <Lock className="w-6 h-6" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Private Invoice Portal</CardTitle>
-            <p className="text-sm text-zinc-400">Enter access key to open Invoice Generator</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Input 
-                type="password" 
-                placeholder="Enter Access Passcode..." 
-                value={passcode} 
-                onChange={(e) => setPasscode(e.target.value)}
-                className="bg-black border-zinc-800 text-white h-12"
-              />
-              <Button type="submit" className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-bold">
-                Unlock Invoice Generator
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  if (!isLoaded) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Loading...</div>;
+  if (!isSignedIn) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white"><SignIn routing="hash" forceRedirectUrl="/admin/invoice" /></div>;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
