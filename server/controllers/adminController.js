@@ -290,8 +290,10 @@ const sendInvoiceEmail = async (req, res) => {
       </html>
     `;
 
+    const senderEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
     const emailResponse = await resend.emails.send({
-      from: "K Freelancing Invoices <onboarding@resend.dev>",
+      from: `${companyName} <${senderEmail}>`,
       to: [customerEmail],
       subject: `Invoice #${invoiceNo} from ${companyName}`,
       html: htmlContent

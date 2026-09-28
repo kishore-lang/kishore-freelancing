@@ -36,8 +36,36 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 2. Validate Service against Trusted Server Config
-    const targetService = SERVICES[serviceId];
+    // 2. Validate Service against Trusted Server Config OR Database
+    let targetService = SERVICES[serviceId];
+
+    // If not found in hardcoded config, look up in database (for admin-added services)
+    if (!targetService) {
+      try {
+        const client = await pool.connect();
+        try {
+          const dbResult = await client.query(
+            `SELECT service_key, service_name, price FROM services WHERE service_key = $1`,
+            [serviceId]
+          );
+          if (dbResult.rows.length > 0) {
+            const dbService = dbResult.rows[0];
+            targetService = {
+              id: dbService.service_key,
+              key: dbService.service_key,
+              name: dbService.service_name,
+              amount: dbService.price ? Number(dbService.price) : null,
+              isCustom: !dbService.price,
+            };
+          }
+        } finally {
+          client.release();
+        }
+      } catch (dbLookupError) {
+        console.warn("DB service lookup failed, falling back to config only:", dbLookupError.message);
+      }
+    }
+
     if (!targetService) {
       return res.status(400).json({
         success: false,
