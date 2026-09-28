@@ -12,6 +12,7 @@ router.get("/", async (req, res) => {
     try {
       const result = await client.query(`
         SELECT * FROM services 
+        WHERE is_active = TRUE OR is_active IS NULL
         ORDER BY id ASC
       `);
 

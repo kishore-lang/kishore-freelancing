@@ -129,12 +129,7 @@ const deleteService = async (req, res) => {
     const client = await pool.connect();
     
     try {
-      // First, check if the service has any orders. If it does, we shouldn't hard-delete it 
-      // or we should handle it gracefully (e.g. set it to inactive). For MVP, we will hard delete
-      // only if no orders depend on it, or we delete and let the DB foreign key constrain it.
-      // Wait, there's a foreign key from orders -> services. 
-      // Let's just try to delete, if it fails due to FK, catch it and return error.
-      
+      // First try to hard delete the service
       const result = await client.query('DELETE FROM services WHERE id = $1 RETURNING *', [id]);
       
       if (result.rowCount === 0) {
@@ -142,14 +137,21 @@ const deleteService = async (req, res) => {
       }
 
       res.status(200).json({ success: true, message: "Service deleted successfully" });
+    } catch (error) {
+      if (error.code === '23503') { 
+        // PostgreSQL foreign_key_violation: Fallback to soft delete
+        await client.query('UPDATE services SET is_active = FALSE WHERE id = $1', [id]);
+        return res.status(200).json({ 
+          success: true, 
+          message: "Product hidden from website (soft-deleted to preserve existing customer order history)." 
+        });
+      }
+      throw error;
     } finally {
       client.release();
     }
   } catch (error) {
     console.error("Error deleting service:", error);
-    if (error.code === '23503') { // PostgreSQL foreign_key_violation
-      return res.status(400).json({ success: false, message: "Cannot delete this service because customers have already ordered it." });
-    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
