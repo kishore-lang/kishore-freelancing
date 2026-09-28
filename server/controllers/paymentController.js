@@ -3,6 +3,7 @@ const { razorpayInstance } = require("../config/razorpay");
 const SERVICES = require("../config/services");
 const { pool } = require("../config/database");
 const { sendPaymentSuccessNotification } = require("../services/notificationService");
+const { sendTelegramAlert } = require("../services/telegramService");
 
 // Fallback in-memory data structures if PostgreSQL server is offline
 const memoryStore = {
@@ -359,7 +360,9 @@ const verifyPayment = async (req, res) => {
             paymentId: razorpay_payment_id,
           });
 
-          // Trigger Order Confirmation Email asynchronously
+          sendTelegramAlert(🚀 <b>NEW PAYMENT!</b>\n💰 <b>Order:</b> \
+💳 <b>Payment:</b> \).catch(e => console.log(e));
+            // Trigger Order Confirmation Email asynchronously
           // We don't await this so it doesn't slow down the response to the user
           // Error handling is built into the email service so it won't crash the server
           const emailService = require("../services/emailService");
