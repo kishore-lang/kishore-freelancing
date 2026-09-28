@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { getRazorpayStatus } = require("./config/razorpay");
 const { initDatabase } = require("./config/initDatabase");
+const { connectRedis } = require("./config/redis");
 const paymentRoutes = require("./routes/paymentRoutes");
 const { getWhatsAppStatus } = require("./services/notificationService");
 
