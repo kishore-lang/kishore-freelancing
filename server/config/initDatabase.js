@@ -40,7 +40,8 @@ const initDatabase = async () => {
       await client.query(`
         ALTER TABLE services 
         ADD COLUMN IF NOT EXISTS description TEXT,
-        ADD COLUMN IF NOT EXISTS icon VARCHAR(50);
+        ADD COLUMN IF NOT EXISTS icon VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
       `);
 
       // 3. Table: orders
