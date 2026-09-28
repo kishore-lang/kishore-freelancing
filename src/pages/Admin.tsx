@@ -12,11 +12,25 @@ import {
   Clock,
   Trash2
 } from "lucide-react";
-import { SignedIn, SignedOut, SignIn, UserButton, useAuth } from "@clerk/react";
+import { ClerkProvider, SignedIn, SignedOut, SignIn, UserButton, useAuth } from "@clerk/react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-export default function AdminDashboard() {
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+export default function AdminDashboardWrapper() {
+  if (!PUBLISHABLE_KEY) {
+    return <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-6 text-center">Missing VITE_CLERK_PUBLISHABLE_KEY in Firebase environment variables.<br/>Please add it to Firebase and deploy again.</div>;
+  }
+
+  return (
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <AdminDashboard />
+    </ClerkProvider>
+  );
+}
+
+function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalCustomers: 0 });
   const [orders, setOrders] = useState<any[]>([]);
@@ -314,7 +328,7 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                                 {order.status === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1" />}
                                 {order.status.toUpperCase()}
                               </span>
