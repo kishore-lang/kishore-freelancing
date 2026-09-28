@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,40 +8,41 @@ import {
   IndianRupee, 
   ShoppingCart, 
   Users, 
-  Lock, 
-  LogOut,
   Loader2,
   CheckCircle2,
   Clock,
   Trash2
 } from "lucide-react";
+import { SignedIn, SignedOut, SignIn, UserButton, useAuth } from "@clerk/react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState({ totalRevenue: 0, totalOrders: 0, totalCustomers: 0 });
   const [orders, setOrders] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [newProduct, setNewProduct] = useState({ service_name: '', description: '', price: '', icon: 'Sparkles' });
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  
   const { toast } = useToast();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
-    const savedPassword = sessionStorage.getItem("adminPassword");
-    if (savedPassword) {
-      verifyAndLoadData(savedPassword);
+    if (isLoaded && isSignedIn) {
+      verifyAndLoadData();
     }
-  }, []);
+  }, [isLoaded, isSignedIn]);
 
-  const verifyAndLoadData = async (pass: string) => {
+  const verifyAndLoadData = async () => {
     setIsLoading(true);
     try {
+      const token = await getToken();
+      if (!token) throw new Error("No token found");
+
       // 1. Verify Password & Fetch Stats
-      const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, {
-        headers: { Authorization: `Bearer ${pass}` }
+      const statsRes = await fetch(${API_BASE_URL}/api/admin/stats, {
+        headers: { Authorization: Bearer \ }
       });
       
       const statsData = await statsRes.json();
@@ -53,8 +54,8 @@ export default function AdminDashboard() {
       setStats(statsData.stats);
       
       // 2. Fetch Orders
-      const ordersRes = await fetch(`${API_BASE_URL}/api/admin/orders`, {
-        headers: { Authorization: `Bearer ${pass}` }
+      const ordersRes = await fetch(${API_BASE_URL}/api/admin/orders, {
+        headers: { Authorization: Bearer \ }
       });
       const ordersData = await ordersRes.json();
       
@@ -63,344 +64,272 @@ export default function AdminDashboard() {
       }
 
       // 3. Fetch Services
-      const servicesRes = await fetch(`${API_BASE_URL}/api/services`);
+      const servicesRes = await fetch(${API_BASE_URL}/api/services);
       const servicesData = await servicesRes.json();
       if (servicesRes.ok && servicesData.services) {
         setServices(servicesData.services);
       }
-
-      // Success
-      sessionStorage.setItem("adminPassword", pass);
-      setIsAuthenticated(true);
-      
     } catch (error: any) {
-      sessionStorage.removeItem("adminPassword");
-      setIsAuthenticated(false);
       toast({
-        title: "Access Denied",
-        description: error.message || "Invalid password or server error",
-        variant: "destructive"
+        variant: "destructive",
+        title: "Error loading data",
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password.trim()) return;
-    verifyAndLoadData(password);
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminPassword");
-    setIsAuthenticated(false);
-    setPassword("");
-  };
-
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProduct.service_name) return;
-    
     setIsAddingProduct(true);
     try {
-      const pass = sessionStorage.getItem("adminPassword");
-      const res = await fetch(`${API_BASE_URL}/api/admin/services`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${pass}` 
+      const token = await getToken();
+      const res = await fetch(${API_BASE_URL}/api/admin/services, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: Bearer \
         },
         body: JSON.stringify(newProduct)
       });
       const data = await res.json();
+      
       if (res.ok) {
-        toast({ title: "Success", description: "Product added instantly to website!" });
+        toast({ title: "Success", description: "Service added successfully" });
         setNewProduct({ service_name: '', description: '', price: '', icon: 'Sparkles' });
-        // Refresh services
-        const servicesRes = await fetch(`${API_BASE_URL}/api/services`);
-        const servicesData = await servicesRes.json();
-        if (servicesRes.ok && servicesData.services) {
-          setServices(servicesData.services);
-        }
+        verifyAndLoadData();
       } else {
         throw new Error(data.message);
       }
     } catch (error: any) {
-      toast({ title: "Failed", description: error.message, variant: "destructive" });
+      toast({ variant: "destructive", title: "Failed to add service", description: error.message });
     } finally {
       setIsAddingProduct(false);
     }
   };
 
   const handleDeleteProduct = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this product? It will be removed from your website.")) return;
+    if (!confirm("Are you sure you want to delete this service?")) return;
     
     try {
-      const pass = sessionStorage.getItem("adminPassword");
-      const res = await fetch(`${API_BASE_URL}/api/admin/services/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${pass}` }
+      const token = await getToken();
+      const res = await fetch(${API_BASE_URL}/api/admin/services/\, {
+        method: "DELETE",
+        headers: { Authorization: Bearer \ }
       });
       const data = await res.json();
+      
       if (res.ok) {
-        toast({ title: "Success", description: "Product deleted from website." });
-        setServices(services.filter(s => s.id !== id));
+        toast({ title: "Deleted", description: data.message });
+        verifyAndLoadData();
       } else {
         throw new Error(data.message);
       }
     } catch (error: any) {
-      toast({ title: "Failed to Delete", description: error.message, variant: "destructive" });
+      toast({ variant: "destructive", title: "Delete Failed", description: error.message });
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">Loading Admin...</div>;
+  }
+
+  if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-black/95 flex items-center justify-center p-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl">
-            <CardHeader className="text-center space-y-2">
-              <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Lock className="w-6 h-6 text-orange-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-white">Admin Access</CardTitle>
-              <p className="text-sm text-zinc-400">Enter master password to access the dashboard</p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <Input
-                  type="password"
-                  placeholder="Enter password..."
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-black/50 border-zinc-800 text-white placeholder:text-zinc-500 h-12"
-                />
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-medium"
-                >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Access Dashboard"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center p-6">
+        <h1 className="text-3xl font-bold mb-8">Kishore Admin Dashboard</h1>
+        <SignIn routing="hash" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 md:p-8">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <header className="flex justify-between items-center pb-6 border-b border-gray-800">
           <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-orange-600">
-              Agency Dashboard
-            </h1>
-            <p className="text-zinc-400 mt-1">Overview of your freelance business</p>
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-gray-400 mt-1">Manage your freelance business</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => window.location.href = "/admin/invoice"}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold"
-            >
-              Invoice Generator
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800"
-            >
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </Button>
+          <div className="flex items-center gap-4">
+            <UserButton afterSignOutUrl="/" />
           </div>
-        </div>
+        </header>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-zinc-900/50 border-zinc-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-400">Total Revenue</CardTitle>
-              <IndianRupee className="w-4 h-4 text-emerald-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white">₹{stats.totalRevenue.toLocaleString()}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-zinc-900/50 border-zinc-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-400">Total Orders</CardTitle>
-              <ShoppingCart className="w-4 h-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white">{stats.totalOrders}</div>
-            </CardContent>
-          </Card>
+        {/* Dashboard Content */}
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          </div>
+        ) : (
+          <>
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Total Revenue</CardTitle>
+                  <IndianRupee className="w-4 h-4 text-green-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-400">₹{stats.totalRevenue}</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Total Orders</CardTitle>
+                  <ShoppingCart className="w-4 h-4 text-purple-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-purple-400">{stats.totalOrders}</div>
+                </CardContent>
+              </Card>
 
-          <Card className="bg-zinc-900/50 border-zinc-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-zinc-400">Total Clients</CardTitle>
-              <Users className="w-4 h-4 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white">{stats.totalCustomers}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Orders Table */}
-        <Card className="bg-zinc-900/50 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-zinc-400 uppercase bg-black/40">
-                  <tr>
-                    <th className="px-6 py-4 rounded-tl-lg">Date</th>
-                    <th className="px-6 py-4">Client</th>
-                    <th className="px-6 py-4">Service</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 rounded-tr-lg">Payment ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-zinc-500">
-                        No orders found
-                      </td>
-                    </tr>
-                  ) : (
-                    orders.map((order: any, idx: number) => (
-                      <tr key={idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
-                        <td className="px-6 py-4 text-zinc-300">
-                          {new Date(order.created_at).toLocaleDateString('en-IN', {
-                            day: 'numeric', month: 'short', year: 'numeric'
-                          })}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-white">{order.customer_name}</div>
-                          <div className="text-xs text-zinc-500">{order.customer_email}</div>
-                        </td>
-                        <td className="px-6 py-4 text-zinc-300">{order.service_name || "Custom"}</td>
-                        <td className="px-6 py-4 font-medium text-white">₹{order.amount}</td>
-                        <td className="px-6 py-4">
-                          {order.order_status === 'paid' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Paid
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-500/10 text-zinc-400">
-                              <Clock className="w-3.5 h-3.5" /> Pending
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-xs font-mono text-zinc-500">
-                          {order.razorpay_payment_id || "N/A"}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Total Customers</CardTitle>
+                  <Users className="w-4 h-4 text-blue-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-400">{stats.totalCustomers}</div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Add Product Form */}
-        <Card className="bg-zinc-900/50 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">Add New Product</CardTitle>
-            <p className="text-sm text-zinc-400">Products added here will instantly appear on your website.</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAddProduct} className="space-y-4 max-w-2xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-300">Service Name</label>
-                  <Input 
-                    required 
-                    placeholder="e.g. SEO Optimization" 
-                    value={newProduct.service_name}
-                    onChange={(e) => setNewProduct({...newProduct, service_name: e.target.value})}
-                    className="bg-black/50 border-zinc-800"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-300">Price (₹)</label>
-                  <Input 
-                    type="number"
-                    placeholder="e.g. 5000" 
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                    className="bg-black/50 border-zinc-800"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-300">Description</label>
-                <Input 
-                  placeholder="Short description of the service..." 
-                  value={newProduct.description}
-                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
-                  className="bg-black/50 border-zinc-800"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-300">Icon Name (Lucide-react)</label>
-                <Input 
-                  placeholder="e.g. Sparkles, Globe, ShoppingCart" 
-                  value={newProduct.icon}
-                  onChange={(e) => setNewProduct({...newProduct, icon: e.target.value})}
-                  className="bg-black/50 border-zinc-800"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                disabled={isAddingProduct}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                {isAddingProduct ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Add Product to Website
-              </Button>
-            </form>
-
-            <div className="mt-8 border-t border-zinc-800 pt-6">
-              <h3 className="text-lg font-medium text-white mb-4">Current Products</h3>
-              <div className="space-y-3">
-                {services.map(service => (
-                  <div key={service.id} className="flex items-center justify-between p-4 rounded-lg border border-zinc-800 bg-black/40">
-                    <div>
-                      <div className="font-medium text-white">{service.service_name}</div>
-                      <div className="text-sm text-zinc-500">₹{service.price || 'Custom'} • {service.icon}</div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* Add New Product Form */}
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-xl">Add New Service</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleAddProduct} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-400">Service Name</label>
+                      <Input 
+                        required 
+                        value={newProduct.service_name}
+                        onChange={e => setNewProduct({...newProduct, service_name: e.target.value})}
+                        placeholder="e.g. Full-Stack Web App"
+                        className="bg-gray-900 border-gray-700"
+                      />
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDeleteProduct(service.id)}
-                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-400">Description</label>
+                      <Input 
+                        required 
+                        value={newProduct.description}
+                        onChange={e => setNewProduct({...newProduct, description: e.target.value})}
+                        placeholder="Brief description..."
+                        className="bg-gray-900 border-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-400">Price (₹)</label>
+                      <Input 
+                        required 
+                        type="number"
+                        value={newProduct.price}
+                        onChange={e => setNewProduct({...newProduct, price: e.target.value})}
+                        placeholder="10000"
+                        className="bg-gray-900 border-gray-700"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isAddingProduct}>
+                      {isAddingProduct ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Add Service"}
                     </Button>
-                  </div>
-                ))}
-                {services.length === 0 && <div className="text-sm text-zinc-500">No products found.</div>}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </form>
+                </CardContent>
+              </Card>
 
+              {/* Current Services List */}
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-xl">Current Services</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    {services.map(service => (
+                      <div key={service.id} className="p-4 bg-gray-900 rounded-lg flex justify-between items-center border border-gray-700">
+                        <div>
+                          <h4 className="font-medium text-white">{service.service_name}</h4>
+                          <p className="text-sm text-gray-400">₹{service.price}</p>
+                        </div>
+                        <Button 
+                          variant="destructive" 
+                          size="icon"
+                          onClick={() => handleDeleteProduct(service.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Orders List */}
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-xl">Recent Orders</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-gray-700 text-gray-400">
+                        <th className="pb-3 font-medium">Order ID</th>
+                        <th className="pb-3 font-medium">Customer</th>
+                        <th className="pb-3 font-medium">Service</th>
+                        <th className="pb-3 font-medium">Amount</th>
+                        <th className="pb-3 font-medium">Date</th>
+                        <th className="pb-3 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {orders.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-gray-500">
+                            No orders found
+                          </td>
+                        </tr>
+                      ) : (
+                        orders.map(order => (
+                          <tr key={order.id} className="hover:bg-gray-900/50 transition-colors">
+                            <td className="py-4 text-sm font-mono text-gray-400">{order.razorpay_order_id.substring(0, 12)}...</td>
+                            <td className="py-4">
+                              <p className="font-medium text-gray-200">{order.customer_name}</p>
+                              <p className="text-xs text-gray-500">{order.customer_email}</p>
+                            </td>
+                            <td className="py-4 text-gray-300">{order.service_name}</td>
+                            <td className="py-4 font-medium text-green-400">₹{order.amount}</td>
+                            <td className="py-4 text-sm text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(order.created_at).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="py-4">
+                              <span className={inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \}>
+                                {order.status === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                                {order.status.toUpperCase()}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );
