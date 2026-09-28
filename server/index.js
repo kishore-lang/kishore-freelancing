@@ -17,6 +17,8 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "https://kishore-port.web.app",
   "https://portfolio-demo-14a3f.web.app",
+  "https://kfreelance.online",
+  "https://www.kfreelance.online",
 ];
 
 const corsOptions = {
