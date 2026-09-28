@@ -266,7 +266,7 @@ function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    {services.map(service => (
+                    {(services || []).map(service => (
                       <div key={service.id} className="p-4 bg-gray-900 rounded-lg flex justify-between items-center border border-gray-700">
                         <div>
                           <h4 className="font-medium text-white">{service.service_name}</h4>
@@ -305,14 +305,14 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">
-                      {orders.length === 0 ? (
+                      {(orders?.length || 0) === 0 ? (
                         <tr>
                           <td colSpan={6} className="py-8 text-center text-gray-500">
                             No orders found
                           </td>
                         </tr>
                       ) : (
-                        orders.map(order => (
+                        (orders || []).map(order => (
                           <tr key={order.id} className="hover:bg-gray-900/50 transition-colors">
                             <td className="py-4 text-sm font-mono text-gray-400">{(order.razorpay_order_id ? order.razorpay_order_id.substring(0, 12) : 'N/A')}...</td>
                             <td className="py-4">
@@ -330,7 +330,7 @@ function AdminDashboard() {
                             <td className="py-4">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                                 {order.status === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                                {order.status.toUpperCase()}
+                                {(order.status ? order.status.toUpperCase() : "UNKNOWN")}
                               </span>
                             </td>
                           </tr>
