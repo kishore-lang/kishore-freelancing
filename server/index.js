@@ -1,5 +1,7 @@
 require("dotenv").config();
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 const { getRazorpayStatus } = require("./config/razorpay");
 const { initDatabase } = require("./config/initDatabase");
@@ -8,6 +10,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const { getWhatsAppStatus } = require("./services/notificationService");
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Configured allowed origins for CORS security
@@ -21,6 +24,21 @@ const allowedOrigins = [
   "https://kfreelance.online",
   "https://www.kfreelance.online",
 ];
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+  }
+});
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("[Socket.io] Admin connected: " + socket.id);
+  socket.on("disconnect", () => {
+    console.log("[Socket.io] Admin disconnected: " + socket.id);
+  });
+});
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -117,7 +135,7 @@ const startServer = async () => {
   await initDatabase();
   await connectRedis();
 
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     const waStatus = getWhatsAppStatus();
     console.log(`=================================`);
     console.log(`Backend Server running on port ${PORT}`);
