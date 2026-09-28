@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { ClerkProvider } from "@clerk/clerk-react";
 import Index from "./pages/Index";
 import Freelancing from "./pages/Freelancing";
 import Booking from "./pages/Booking";
@@ -17,7 +18,13 @@ import InvoiceGenerator from "./pages/InvoiceGenerator";
 
 const queryClient = new QueryClient();
 
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+if (!PUBLISHABLE_KEY) {
+  console.error("Missing VITE_CLERK_PUBLISHABLE_KEY in .env");
+}
+
 const App = () => (
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -41,6 +48,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
+  </ClerkProvider>
 );
 
 export default App;

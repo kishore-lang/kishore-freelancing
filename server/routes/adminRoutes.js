@@ -1,4 +1,5 @@
 const express = require("express");
+const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
 const { 
   getDashboardStats, 
   getRecentOrders, 
@@ -9,22 +10,7 @@ const {
 const router = express.Router();
 
 // Simple middleware to check ADMIN_PASSWORD
-const verifyAdminPassword = (req, res, next) => {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  
-  if (!adminPassword) {
-    console.error("ADMIN_PASSWORD not set in environment variables");
-    return res.status(500).json({ success: false, message: "Server configuration error" });
-  }
-
-  // Get password from header
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
-    return res.status(401).json({ success: false, message: "Unauthorized: Invalid password" });
-  }
-
-  next();
-};
+const verifyAdminPassword = ClerkExpressRequireAuth();
 
 // Apply auth middleware to all admin routes
 router.use(verifyAdminPassword);
