@@ -292,7 +292,7 @@ const sendInvoiceEmail = async (req, res) => {
       </html>
     `;
 
-    const senderEmail = process.env.RESEND_FROM_EMAIL || "hello@kfreelance.online";
+    const senderEmail = process.env.RESEND_FROM_EMAIL || "support@kfreelance.online";
 
     const emailResponse = await resend.emails.send({
       from: `${companyName} <${senderEmail}>`,

@@ -7,7 +7,7 @@ class EmailService {
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
     // Updated to use the newly purchased domain
-    this.defaultFrom = 'hello@kfreelance.online'; 
+    this.defaultFrom = 'support@kfreelance.online'; 
   }
 
   /**
