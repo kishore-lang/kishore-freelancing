@@ -152,7 +152,7 @@ function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center p-6">
         <h1 className="text-3xl font-bold mb-8">Kishore Admin Dashboard</h1>
-        <SignIn routing="hash" />
+        <SignIn routing="hash" forceRedirectUrl="/admin" />
       </div>
     );
   }
