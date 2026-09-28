@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ function AdminDashboard() {
                   <IndianRupee className="w-4 h-4 text-green-400" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-400">₹{stats.totalRevenue}</div>
+                  <div className="text-2xl font-bold text-green-400">â‚¹{stats.totalRevenue}</div>
                 </CardContent>
               </Card>
               
@@ -242,7 +242,7 @@ function AdminDashboard() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-400">Price (₹)</label>
+                      <label className="text-sm font-medium text-gray-400">Price (â‚¹)</label>
                       <Input 
                         required 
                         type="number"
@@ -270,7 +270,7 @@ function AdminDashboard() {
                       <div key={service.id} className="p-4 bg-gray-900 rounded-lg flex justify-between items-center border border-gray-700">
                         <div>
                           <h4 className="font-medium text-white">{service.service_name}</h4>
-                          <p className="text-sm text-gray-400">₹{service.price}</p>
+                          <p className="text-sm text-gray-400">â‚¹{service.price}</p>
                         </div>
                         <Button 
                           variant="destructive" 
@@ -314,13 +314,13 @@ function AdminDashboard() {
                       ) : (
                         orders.map(order => (
                           <tr key={order.id} className="hover:bg-gray-900/50 transition-colors">
-                            <td className="py-4 text-sm font-mono text-gray-400">{order.razorpay_order_id.substring(0, 12)}...</td>
+                            <td className="py-4 text-sm font-mono text-gray-400">{(order.razorpay_order_id ? order.razorpay_order_id.substring(0, 12) : 'N/A')}...</td>
                             <td className="py-4">
                               <p className="font-medium text-gray-200">{order.customer_name}</p>
                               <p className="text-xs text-gray-500">{order.customer_email}</p>
                             </td>
                             <td className="py-4 text-gray-300">{order.service_name}</td>
-                            <td className="py-4 font-medium text-green-400">₹{order.amount}</td>
+                            <td className="py-4 font-medium text-green-400">â‚¹{order.amount}</td>
                             <td className="py-4 text-sm text-gray-400">
                               <div className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
@@ -328,7 +328,7 @@ function AdminDashboard() {
                               </div>
                             </td>
                             <td className="py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium \${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
                                 {order.status === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1" />}
                                 {order.status.toUpperCase()}
                               </span>
