@@ -360,9 +360,11 @@ const verifyPayment = async (req, res) => {
             paymentId: razorpay_payment_id,
           });
 
-          sendTelegramAlert(🚀 <b>NEW PAYMENT!</b>\n💰 <b>Order:</b> \
-💳 <b>Payment:</b> \).catch(e => console.log(e));
-            // Trigger Order Confirmation Email asynchronously
+          // Trigger Telegram Alert
+          const telegramMsg = `[NEW PAYMENT] Order: ${razorpay_order_id} | Payment: ${razorpay_payment_id}`;
+          sendTelegramAlert(telegramMsg).catch(e => console.error("Telegram Error", e));
+
+          // Trigger Order Confirmation Email asynchronously
           // We don't await this so it doesn't slow down the response to the user
           // Error handling is built into the email service so it won't crash the server
           const emailService = require("../services/emailService");
