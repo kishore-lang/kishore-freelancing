@@ -360,6 +360,20 @@ const verifyPayment = async (req, res) => {
             paymentId: razorpay_payment_id,
           });
 
+          try {
+            const io = req.app.get("io");
+            if (io) {
+              io.emit("new_payment", {
+                orderId: razorpay_order_id,
+                amount: amountPaise ? amountPaise / 100 : 0,
+                customerName: customerDetails?.full_name || "Customer",
+                serviceName: customerDetails?.service_name || "Freelance Service"
+              });
+            }
+          } catch (err) {
+            console.error("Socket emit error:", err);
+          }
+
           // Trigger Telegram Alert
           const telegramMsg = `[NEW PAYMENT] Order: ${razorpay_order_id} | Payment: ${razorpay_payment_id}`;
           sendTelegramAlert(telegramMsg).catch(e => console.error("Telegram Error", e));
