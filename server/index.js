@@ -114,6 +114,7 @@ app.use((err, req, res, next) => {
 // Initialize Database & Start Express Server
 const startServer = async () => {
   await initDatabase();
+  await connectRedis();
 
   app.listen(PORT, () => {
     const waStatus = getWhatsAppStatus();

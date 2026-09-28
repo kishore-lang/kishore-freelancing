@@ -17,6 +17,7 @@
     "nodemailer": "^10.0.10",
     "pg": "^8.23.0",
     "razorpay": "^2.9.8",
+    "redis": "^6.2.1",
     "resend": "^6.26.0"
   },
   "devDependencies": {
