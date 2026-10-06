@@ -33,8 +33,17 @@ const getImageForService = (title: string, Icon: LucideIcon) => {
 export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps) => {
   const navigate = useNavigate();
   const imageUrl = getImageForService(service.title, service.icon);
+  
+  // Check if this is a rental item
+  const isRental = service.title.toLowerCase().includes('rental') || service.title.toLowerCase().includes('rent');
 
   const handleBookNow = () => {
+    if (isRental) {
+      // Redirect to WhatsApp directly for rental enquiries
+      const message = encodeURIComponent(`Hi Kishore, I would like to enquire about renting: ${service.title}`);
+      window.open(`https://wa.me/917904001962?text=${message}`, '_blank');
+      return;
+    }
     onSelect(service);
     navigate(`/booking?serviceId=${service.id}`);
   };
@@ -90,7 +99,7 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
                 : "bg-white text-black hover:bg-red-600 hover:text-white"
             }`}
           >
-            {isSelected ? "Selected ✓" : "Book Now"}
+            {isSelected ? "Selected \u2713" : isRental ? "Enquire via WhatsApp" : "Book Now"}
           </Button>
         </div>
       </div>

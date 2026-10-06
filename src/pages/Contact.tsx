@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ParticlesBackground } from "@/components/ParticlesBackground";
 import { Navigation } from "@/components/Navigation";
@@ -9,13 +10,29 @@ import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
   const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    message: ""
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Redirect to WhatsApp with message
+    const msg = encodeURIComponent(
+      `Hi Kishore,\n\nI am ${formData.firstName} ${formData.lastName} (${formData.email}).\n\nI wanted to reach out regarding: \n${formData.message}`
+    );
+    window.open(`https://wa.me/917904001962?text=${msg}`, '_blank');
+    
     toast({
-      title: "Message Sent!",
-      description: "We'll get back to you as soon as possible.",
+      title: "Opening WhatsApp!",
+      description: "Redirecting you to WhatsApp to send your message.",
     });
+    
+    // Clear form
+    setFormData({ firstName: "", lastName: "", email: "", message: "" });
   };
 
   return (
@@ -47,28 +64,53 @@ const Contact = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="glass-card p-8 rounded-2xl border border-white/10"
             >
-              <h2 className="text-2xl font-semibold mb-6">Send us a message</h2>
+              <h2 className="text-2xl font-semibold mb-6">Send us a message via WhatsApp</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">First Name</label>
-                    <Input placeholder="John" className="bg-white/5 border-white/10 focus:border-primary" required />
+                    <Input 
+                      placeholder="John" 
+                      className="bg-white/5 border-white/10 focus:border-primary" 
+                      required 
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Last Name</label>
-                    <Input placeholder="Doe" className="bg-white/5 border-white/10 focus:border-primary" required />
+                    <Input 
+                      placeholder="Doe" 
+                      className="bg-white/5 border-white/10 focus:border-primary" 
+                      required 
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Email Address</label>
-                  <Input type="email" placeholder="john@example.com" className="bg-white/5 border-white/10 focus:border-primary" required />
+                  <Input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    className="bg-white/5 border-white/10 focus:border-primary" 
+                    required 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Your Message</label>
-                  <Textarea placeholder="Tell us about your project..." className="min-h-[150px] bg-white/5 border-white/10 focus:border-primary" required />
+                  <Textarea 
+                    placeholder="Tell us about your project..." 
+                    className="min-h-[150px] bg-white/5 border-white/10 focus:border-primary" 
+                    required 
+                    value={formData.message}
+                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  />
                 </div>
                 <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold h-12 text-lg hover:opacity-90 transition-opacity">
-                  Send Message
+                  Send WhatsApp Message
                 </Button>
               </form>
             </motion.div>
@@ -80,15 +122,13 @@ const Contact = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="space-y-8"
             >
-              <div className="glass-card p-8 rounded-2xl border border-white/10 space-y-6">
-                <h3 className="text-xl font-semibold text-foreground border-b border-white/10 pb-4">Agency Details</h3>
-                
+              <div className="glass-card p-8 rounded-2xl border border-white/10 space-y-8">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                     <Mail className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-foreground">Email Us</h4>
+                    <h4 className="font-medium text-foreground">Email</h4>
                     <p className="text-muted-foreground">hello@kfreelancing.com</p>
                   </div>
                 </div>
@@ -98,8 +138,8 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-secondary" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-foreground">Call Us</h4>
-                    <p className="text-muted-foreground">+91 (800) 123-4567</p>
+                    <h4 className="font-medium text-foreground">Call Us / WhatsApp</h4>
+                    <p className="text-muted-foreground">+91 7904001962</p>
                   </div>
                 </div>
 
