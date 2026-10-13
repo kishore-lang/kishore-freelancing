@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { LucideIcon, CheckCircle2 } from "lucide-react";
+import { LucideIcon, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -17,15 +17,16 @@ interface ServiceCardProps {
   service: ServiceItem;
   isSelected: boolean;
   onSelect: (service: ServiceItem) => void;
+  index?: number;
 }
 
 const getImageForService = (title: string, Icon: LucideIcon) => {
   const t = title.toLowerCase();
   const iconName = Icon?.displayName || Icon?.name || "";
   
-  if (t.includes("app") || t.includes("mobile") || iconName.includes("Smartphone")) return "/service_app.jpg";
-  if (t.includes("ui") || t.includes("ux") || t.includes("design") || iconName.includes("PenTool")) return "/service_ui.jpg";
-  if (t.includes("data") || t.includes("seo") || t.includes("consulting") || iconName.includes("Trending")) return "/service_data.jpg";
+  if (t.includes("app") || t.includes("mobile") || t.includes("saas") || iconName.includes("Smartphone") || iconName.includes("Rocket")) return "/service_app.jpg";
+  if (t.includes("ui") || t.includes("ux") || t.includes("design") || iconName.includes("PenTool") || iconName.includes("Layout")) return "/service_ui.jpg";
+  if (t.includes("data") || t.includes("seo") || t.includes("consulting") || t.includes("backend") || t.includes("api") || iconName.includes("Trending") || iconName.includes("Server")) return "/service_data.jpg";
   
   return "/service_web.jpg";
 };
@@ -36,6 +37,7 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
   
   // Check if this is a rental item
   const isRental = service.title.toLowerCase().includes('rental') || service.title.toLowerCase().includes('rent');
+  const isCustom = service.isCustom || service.title.toLowerCase().includes('custom');
 
   const handleBookNow = () => {
     if (isRental) {
@@ -55,12 +57,20 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
       className={`bg-zinc-900 border flex flex-col justify-between relative overflow-hidden transition-all duration-300 rounded-none shadow-xl ${
         isSelected
           ? "border-red-600 shadow-red-600/20"
+          : isCustom
+          ? "border-amber-500/40 hover:border-amber-500"
           : "border-zinc-800 hover:border-red-600/50"
       }`}
     >
       {isSelected && (
         <div className="absolute top-4 right-4 z-10 text-white bg-red-600 p-1 rounded-full shadow-lg">
           <CheckCircle2 size={24} />
+        </div>
+      )}
+
+      {isCustom && !isSelected && (
+        <div className="absolute top-4 right-4 z-10 bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs px-2.5 py-1 font-bold uppercase tracking-wider flex items-center gap-1 backdrop-blur-md">
+          <Sparkles className="w-3 h-3" /> Custom Scope
         </div>
       )}
 
@@ -73,7 +83,7 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent"></div>
         <div className="absolute bottom-4 left-4 bg-black/80 p-2 border border-white/10 backdrop-blur-sm">
-          <service.icon className="w-6 h-6 text-red-500" />
+          <service.icon className={`w-6 h-6 ${isCustom ? "text-amber-400" : "text-red-500"}`} />
         </div>
       </div>
 
@@ -85,8 +95,10 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
 
         <div className="mt-auto pt-6 border-t border-zinc-800">
           <div className="flex items-baseline justify-between mb-6">
-            <span className="text-xs uppercase tracking-wider text-zinc-500 font-bold">Starting at</span>
-            <span className="text-2xl font-black text-white">
+            <span className="text-xs uppercase tracking-wider text-zinc-500 font-bold">
+              {isCustom ? "Budget Range" : isRental ? "Hire Rate" : "Starting at"}
+            </span>
+            <span className={`font-black text-white ${isCustom ? "text-lg text-amber-400" : "text-2xl"}`}>
               {service.price}
             </span>
           </div>
@@ -96,10 +108,18 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
             className={`w-full h-12 font-bold rounded-none transition-all duration-300 text-base ${
               isSelected
                 ? "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/30"
+                : isCustom
+                ? "bg-amber-500 text-black hover:bg-amber-400"
                 : "bg-white text-black hover:bg-red-600 hover:text-white"
             }`}
           >
-            {isSelected ? "Selected \u2713" : isRental ? "Enquire via WhatsApp" : "Book Now"}
+            {isSelected 
+              ? "Selected \u2713" 
+              : isRental 
+              ? "Enquire via WhatsApp" 
+              : isCustom 
+              ? "Configure Custom Budget" 
+              : "Book Now"}
           </Button>
         </div>
       </div>

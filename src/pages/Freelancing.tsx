@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { ServiceCard, ServiceItem } from "@/components/ServiceCard";
-import { FreelanceOrderForm } from "@/components/FreelanceOrderForm";
 import * as LucideIcons from "lucide-react";
 import { Zap } from "lucide-react";
 
@@ -22,14 +21,15 @@ const Freelancing = () => {
         if (data.success && data.services) {
           const mappedServices = data.services.map((s: any) => {
             const IconComponent = (LucideIcons as any)[s.icon] || LucideIcons.Sparkles;
+            const isCustom = !s.price || s.service_key.includes("custom");
             return {
               id: s.service_key,
               title: s.service_name,
               description: s.description || "Premium freelance service",
-              price: s.price ? `₹${Number(s.price).toLocaleString()}` : "Custom",
+              price: s.price ? `₹${Number(s.price).toLocaleString("en-IN")}` : "₹5,000 - ₹1,00,000+",
               numericPrice: s.price ? Number(s.price) : 0,
               icon: IconComponent,
-              isCustom: !s.price
+              isCustom: isCustom
             };
           });
           setServices(mappedServices);
@@ -49,10 +49,6 @@ const Freelancing = () => {
 
   const handleSelectService = (service: ServiceItem) => {
     setSelectedService(service);
-    const element = document.getElementById("order-form-section");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
   };
 
   return (
@@ -89,7 +85,7 @@ const Freelancing = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg sm:text-xl md:text-2xl font-bold text-zinc-300 mb-4"
           >
-            Let's build something amazing together.
+            Let's build something extraordinary together.
           </motion.p>
 
           <motion.p
@@ -98,7 +94,7 @@ const Freelancing = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-sm sm:text-base text-zinc-400 font-medium max-w-2xl mx-auto"
           >
-            From stunning Landing Pages to complex Fullstack Applications. Choose a service below, check out the pricing, and let's get your project started.
+            From high-conversion Web Platforms to complex Full-Stack SaaS Systems and Custom Solutions. Select a package below to get started.
           </motion.p>
         </section>
 

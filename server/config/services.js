@@ -1,95 +1,99 @@
 /**
  * Server-Side Trusted Pricing Catalog for Freelance Services.
- * Supports both canonical keys (portfolio, react, ecommerce, fullstack, api, custom)
- * and detailed hyphenated keys (react-website, etc.).
+ * Enforces server-side amounts to prevent client tampering.
  */
 const SERVICES = {
-  // Canonical keys
-  portfolio: {
-    id: "portfolio",
-    key: "portfolio",
-    name: "Portfolio Website",
-    amount: 2000,
-  },
-  react: {
-    id: "react",
-    key: "react",
-    name: "React Website",
-    amount: 3000,
-  },
-  ecommerce: {
-    id: "ecommerce",
-    key: "ecommerce",
-    name: "E-Commerce Website",
-    amount: 8000,
-  },
-  fullstack: {
-    id: "fullstack",
-    key: "fullstack",
+  "fullstack-web-app": {
+    id: "fullstack-web-app",
+    key: "fullstack-web-app",
     name: "Full-Stack Web Application",
-    amount: 10000,
+    amount: 24999,
   },
-  api: {
-    id: "api",
-    key: "api",
-    name: "API / Backend Integration",
-    amount: 4000,
+  "saas-mvp-dev": {
+    id: "saas-mvp-dev",
+    key: "saas-mvp-dev",
+    name: "SaaS & MVP Product Development",
+    amount: 34999,
   },
-  custom: {
-    id: "custom",
-    key: "custom",
-    name: "Custom Project",
+  "ecommerce-platform": {
+    id: "ecommerce-platform",
+    key: "ecommerce-platform",
+    name: "E-Commerce Platform Solution",
+    amount: 18999,
+  },
+  "frontend-ui-ux": {
+    id: "frontend-ui-ux",
+    key: "frontend-ui-ux",
+    name: "Modern UI/UX & Frontend Engineering",
+    amount: 11999,
+  },
+  "backend-api-architecture": {
+    id: "backend-api-architecture",
+    key: "backend-api-architecture",
+    name: "REST API & Cloud Backend Architecture",
+    amount: 14999,
+  },
+  "seo-performance-audit": {
+    id: "seo-performance-audit",
+    key: "seo-performance-audit",
+    name: "Performance Optimization & SEO Audit",
+    amount: 6999,
+  },
+  "camera-rental": {
+    id: "camera-rental",
+    key: "camera-rental",
+    name: "Cinema Camera & Production Gear Rental",
+    amount: 2500,
+  },
+  "custom-solution": {
+    id: "custom-solution",
+    key: "custom-solution",
+    name: "Custom Enterprise & Tailored Solutions",
     isCustom: true,
-  },
-  test: {
-    id: "test",
-    key: "test",
-    name: "Test Package",
-    amount: 5,
   },
 
-  // Aliases for compatibility
-  "portfolio-website": {
-    id: "portfolio",
-    key: "portfolio",
-    name: "Portfolio Website",
-    amount: 2000,
-  },
-  "react-website": {
-    id: "react",
-    key: "react",
-    name: "React Website",
-    amount: 3000,
-  },
-  "e-commerce-website": {
-    id: "ecommerce",
-    key: "ecommerce",
-    name: "E-Commerce Website",
-    amount: 8000,
-  },
-  "fullstack-application": {
-    id: "fullstack",
-    key: "fullstack",
+  // Legacy & Alias mappings for backwards compatibility
+  fullstack: {
+    id: "fullstack-web-app",
+    key: "fullstack-web-app",
     name: "Full-Stack Web Application",
-    amount: 10000,
+    amount: 24999,
   },
-  "api-backend-integration": {
-    id: "api",
-    key: "api",
-    name: "API / Backend Integration",
-    amount: 4000,
+  ecommerce: {
+    id: "ecommerce-platform",
+    key: "ecommerce-platform",
+    name: "E-Commerce Platform Solution",
+    amount: 18999,
   },
-  "custom-project": {
-    id: "custom",
-    key: "custom",
-    name: "Custom Project",
+  react: {
+    id: "frontend-ui-ux",
+    key: "frontend-ui-ux",
+    name: "Modern UI/UX & Frontend Engineering",
+    amount: 11999,
+  },
+  portfolio: {
+    id: "frontend-ui-ux",
+    key: "frontend-ui-ux",
+    name: "Modern UI/UX & Frontend Engineering",
+    amount: 11999,
+  },
+  api: {
+    id: "backend-api-architecture",
+    key: "backend-api-architecture",
+    name: "REST API & Cloud Backend Architecture",
+    amount: 14999,
+  },
+  custom: {
+    id: "custom-solution",
+    key: "custom-solution",
+    name: "Custom Enterprise & Tailored Solutions",
     isCustom: true,
   },
-  "test-package": {
-    id: "test",
-    key: "test",
-    name: "Test Package",
-    amount: 5,
+  "custom-project": {
+    id: "custom-solution",
+    key: "custom-solution",
+    name: "Custom Enterprise & Tailored Solutions",
+    isCustom: true,
   },
 };
 

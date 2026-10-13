@@ -46,12 +46,13 @@ const formSchema = z
     customAmount: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.selectedService === "Custom Project") {
+    const isCustom = data.selectedService?.toLowerCase().includes("custom");
+    if (isCustom) {
       const num = Number(data.customAmount);
       if (!data.customAmount || isNaN(num) || num <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Please enter a valid positive amount in INR for your custom project.",
+          message: "Please enter or select a valid custom budget amount in INR (minimum ₹1).",
           path: ["customAmount"],
         });
       }
@@ -488,17 +489,45 @@ export const FreelanceOrderForm = ({
               name="customAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-semibold">Custom Amount (INR ₹) *</FormLabel>
+                  <div className="flex items-center justify-between mb-1">
+                    <FormLabel className="text-foreground font-semibold">Custom Budget Amount (INR ₹) *</FormLabel>
+                    <span className="text-xs text-amber-500 font-bold">Suggested: ₹5,000 - ₹1,00,000+</span>
+                  </div>
+                  
+                  {/* Quick Select Preset Budget Chips */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                    {[
+                      { label: "₹10,000", sub: "MVP / Starter", val: "10000" },
+                      { label: "₹25,000", sub: "Standard App", val: "25000" },
+                      { label: "₹50,000", sub: "Advanced SaaS", val: "50000" },
+                      { label: "₹1,00,000", sub: "Enterprise", val: "100000" },
+                    ].map((chip) => (
+                      <button
+                        key={chip.val}
+                        type="button"
+                        onClick={() => form.setValue("customAmount", chip.val, { shouldValidate: true })}
+                        className={`p-2 text-left rounded-lg border text-xs transition-all ${
+                          field.value === chip.val
+                            ? "border-amber-500 bg-amber-500/10 text-white font-bold ring-1 ring-amber-500"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="text-sm font-extrabold text-white">{chip.label}</div>
+                        <div className="text-[10px] text-zinc-400">{chip.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="e.g. 5000"
+                      placeholder="Or type custom budget (e.g. 15000)"
                       {...field}
                       className="bg-background/50 border-white/10 focus:border-primary rounded-xl h-11"
                     />
                   </FormControl>
                   <FormDescription className="text-xs text-muted-foreground">
-                    Enter the agreed custom price in Indian Rupees.
+                    Select a suggested budget tier above or type your exact project budget.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

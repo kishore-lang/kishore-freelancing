@@ -30,14 +30,15 @@ export default function Booking() {
         if (data.success && data.services) {
           const mappedServices = data.services.map((s: any) => {
             const IconComponent = (LucideIcons as any)[s.icon] || LucideIcons.Sparkles;
+            const isCustom = !s.price || s.service_key.includes("custom");
             return {
               id: s.service_key,
               title: s.service_name,
               description: s.description || "Premium freelance service",
-              price: s.price ? `₹${Number(s.price).toLocaleString()}` : "Custom",
+              price: s.price ? `₹${Number(s.price).toLocaleString("en-IN")}` : "₹5,000 - ₹1,00,000+",
               numericPrice: s.price ? Number(s.price) : 0,
               icon: IconComponent,
-              isCustom: !s.price
+              isCustom: isCustom
             };
           });
           
