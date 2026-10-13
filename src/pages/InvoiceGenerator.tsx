@@ -55,7 +55,7 @@ function InvoiceGenerator() {
   const [companyName, setCompanyName] = useState("K FREELANCING");
   const [companyAddress, setCompanyAddress] = useState("123 Tech Park, Anna Nagar, Chennai - 600040");
   const [companyPhone, setCompanyPhone] = useState("+91 98765 43210");
-  const [companyEmail, setCompanyEmail] = useState("contact@kfreelancing.com");
+  const [companyEmail, setCompanyEmail] = useState("kfreelance@kfreelance.online");
   const [companyGst, setCompanyGst] = useState("33AAAAA0000A1Z5");
 
   // UPI Payment Details
