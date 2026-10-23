@@ -249,8 +249,68 @@ const getWhatsAppStatus = () => {
   return status;
 };
 
+/**
+ * Send an OTP message via Meta WhatsApp Cloud API.
+ * 
+ * @param {string} phoneNumber - Destination phone number.
+ * @param {string} otpCode - 6-digit OTP code.
+ * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
+ */
+const sendWhatsAppOtp = async (phoneNumber, otpCode) => {
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const apiVersion = process.env.WHATSAPP_API_VERSION || "v26.0";
+
+  if (!accessToken || !phoneNumberId) {
+    console.warn("[META WHATSAPP OTP] WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID missing.");
+    return { success: false, error: "Missing WhatsApp credentials configuration." };
+  }
+
+  const normalizedNumber = normalizeWhatsAppNumber(phoneNumber);
+  if (!normalizedNumber || normalizedNumber.length < 10) {
+    return { success: false, error: "Invalid WhatsApp phone number." };
+  }
+
+  const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
+  const messageBody = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: normalizedNumber,
+    type: "text",
+    text: {
+      body: `🔐 Your K Freelancing Login Code is: *${otpCode}*\n\nValid for 10 minutes. Do not share this code with anyone.`,
+    },
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(messageBody),
+      signal: AbortSignal.timeout(10000),
+    });
+
+    const responseData = await response.json();
+    if (response.ok && responseData.messages && responseData.messages.length > 0) {
+      console.log(`[META WHATSAPP OTP] OTP successfully sent to ${normalizedNumber}`);
+      return { success: true, messageId: responseData.messages[0].id };
+    } else {
+      const errorMsg = responseData.error?.message || "Meta API error";
+      console.error(`[META WHATSAPP OTP] Meta API error: ${errorMsg}`);
+      return { success: false, error: errorMsg };
+    }
+  } catch (err) {
+    console.error(`[META WHATSAPP OTP] Network exception: ${err.message}`);
+    return { success: false, error: err.message };
+  }
+};
+
 module.exports = {
   sendPaymentSuccessNotification,
+  sendWhatsAppOtp,
   getWhatsAppStatus,
   normalizeWhatsAppNumber,
 };

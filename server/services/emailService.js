@@ -5,11 +5,16 @@ const { Resend } = require('resend');
  */
 class EmailService {
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
-    // Updated sender to K Freelance
     this.defaultFrom = process.env.RESEND_FROM_EMAIL 
       ? (process.env.RESEND_FROM_EMAIL.includes('<') ? process.env.RESEND_FROM_EMAIL : `K Freelance <${process.env.RESEND_FROM_EMAIL}>`)
       : 'K Freelance <kfreelance@kfreelance.online>'; 
+  }
+
+  getResend() {
+    if (!this._resend && process.env.RESEND_API_KEY) {
+      this._resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    return this._resend;
   }
 
   /**
@@ -85,7 +90,11 @@ class EmailService {
     `;
 
     try {
-      const { data, error } = await this.resend.emails.send({
+      const resendClient = this.getResend();
+      if (!resendClient) {
+        return { success: false, error: 'Resend client unavailable' };
+      }
+      const { data, error } = await resendClient.emails.send({
         from: this.defaultFrom,
         to: [customerEmail],
         subject: `Payment Successful - Order Confirmation #${orderId}`,
@@ -103,6 +112,75 @@ class EmailService {
     } catch (err) {
       console.error('[EmailService] Exception during email dispatch:', err.message);
       // Ensure failure never crashes the main thread
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Sends a 6-digit login verification OTP email to the customer.
+   * 
+   * @param {string} toEmail - Customer email address.
+   * @param {string} otpCode - 6-digit verification code.
+   * @param {string} customerName - Name of the customer.
+   * @returns {Promise<{success: boolean, data?: any, error?: string}>}
+   */
+  async sendLoginOtpEmail(toEmail, otpCode, customerName = "Customer") {
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('[EmailService] RESEND_API_KEY is missing. OTP email skipped.');
+      return { success: false, error: 'Missing API Key' };
+    }
+
+    if (!toEmail) {
+      return { success: false, error: 'Customer email is missing.' };
+    }
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+        <div style="background-color: #000000; padding: 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 20px; letter-spacing: 1px;">K FREELANCING</h1>
+          <p style="color: #dc2626; margin: 4px 0 0; font-size: 12px; font-weight: bold; text-transform: uppercase;">Client Portal Security</p>
+        </div>
+        <div style="padding: 32px 28px;">
+          <h2 style="color: #09090b; font-size: 18px; margin-top: 0; font-weight: 700;">Your Login Verification Code</h2>
+          <p style="color: #52525b; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+            Hi ${customerName},<br>Use the 6-digit code below to log in to your K Freelancing Client Portal.
+          </p>
+          
+          <div style="background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; padding: 18px; text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #000000; font-family: monospace;">${otpCode}</span>
+          </div>
+
+          <p style="color: #71717a; font-size: 13px; line-height: 1.5; margin: 0;">
+            This code will expire in <strong>10 minutes</strong>. If you did not request this login, you can safely ignore this email.
+          </p>
+        </div>
+        <div style="background-color: #fafafa; border-top: 1px solid #f4f4f5; padding: 16px; text-align: center; font-size: 11px; color: #a1a1aa;">
+          © ${new Date().getFullYear()} K Freelancing • Professional Web Development
+        </div>
+      </div>
+    `;
+
+    try {
+      const resendClient = this.getResend();
+      if (!resendClient) {
+        return { success: false, error: 'Resend client unavailable' };
+      }
+      const { data, error } = await resendClient.emails.send({
+        from: this.defaultFrom,
+        to: [toEmail],
+        subject: `${otpCode} is your K Freelancing login code`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        console.error('[EmailService] Error sending OTP email:', error);
+        return { success: false, error: error.message };
+      }
+
+      console.log(`[EmailService] Login OTP email sent to ${toEmail}. ID: ${data?.id}`);
+      return { success: true, data };
+    } catch (err) {
+      console.error('[EmailService] Exception during OTP email dispatch:', err.message);
       return { success: false, error: err.message };
     }
   }
