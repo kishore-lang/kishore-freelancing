@@ -25,6 +25,10 @@ import {
   DEV_TEST_PHONE, 
   DEV_TEST_OTP 
 } from "@/lib/supabase";
+import { 
+  sendFirebasePhoneOtp, 
+  verifyFirebasePhoneOtp 
+} from "@/lib/firebaseAuth";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -114,7 +118,15 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
     setLoading(true);
 
     try {
-      const res = await sendPhoneOtp(fullPhone);
+      let res: any;
+      try {
+        // Primary: Firebase Phone Auth (Google real-time SMS to any mobile number)
+        res = await sendFirebasePhoneOtp(fullPhone);
+      } catch (fbErr: any) {
+        console.warn("[PhoneAuth] Firebase send error, attempting Supabase fallback:", fbErr.message);
+        res = await sendPhoneOtp(fullPhone);
+      }
+
       setStep("otp");
       setResendTimer(30);
       setCanResend(false);
@@ -209,7 +221,15 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
     const fullPhone = getE164Phone();
 
     try {
-      const verifyResult = await verifyPhoneOtp(fullPhone, code);
+      let verifyResult: any;
+      try {
+        // Primary: Firebase Phone Auth
+        verifyResult = await verifyFirebasePhoneOtp(fullPhone, code);
+      } catch (fbErr: any) {
+        console.warn("[PhoneAuth] Firebase verify failed, attempting Supabase fallback:", fbErr.message);
+        verifyResult = await verifyPhoneOtp(fullPhone, code);
+      }
+
       const user = verifyResult.user;
       setAuthenticatedUser(user);
 
@@ -469,7 +489,7 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
 
             <div className="pt-2 text-center">
               <p className="text-[11px] text-zinc-500 font-medium">
-                🔒 Secured by Supabase Phone Authentication with end-to-end SMS verification.
+                🔒 Secured by Firebase Google SMS Gateway with instant real-time delivery.
               </p>
             </div>
           </motion.div>
@@ -717,6 +737,9 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Invisible container for Firebase phone auth reCAPTCHA */}
+      <div id="recaptcha-container"></div>
     </div>
   );
 };
