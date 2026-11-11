@@ -18,7 +18,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               <ShieldCheck className="text-red-600 w-7 h-7" /> Client / Student Login
             </DialogTitle>
             <DialogDescription className="text-zinc-600 dark:text-zinc-400 font-medium">
-              Access your project dashboard, active bookings, and course records via Supabase Phone OTP.
+              Access your project dashboard, active bookings, and course records via Mobile SMS OTP.
             </DialogDescription>
           </DialogHeader>
 

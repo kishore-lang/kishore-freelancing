@@ -20,7 +20,6 @@ export function getOrCreateRecaptchaVerifier(containerId = "recaptcha-container"
   if (!container) {
     container = document.createElement("div");
     container.id = containerId;
-    container.style.display = "none";
     document.body.appendChild(container);
   }
 
@@ -40,7 +39,13 @@ export function getOrCreateRecaptchaVerifier(containerId = "recaptcha-container"
       console.log("[Firebase] Invisible reCAPTCHA successfully validated.");
     },
     "expired-callback": () => {
-      console.warn("[Firebase] reCAPTCHA token expired. Re-verifying...");
+      console.warn("[Firebase] reCAPTCHA token expired. Resetting...");
+      if (globalRecaptchaVerifier) {
+        try {
+          globalRecaptchaVerifier.clear();
+        } catch (_) {}
+        globalRecaptchaVerifier = null;
+      }
     }
   });
 
@@ -91,12 +96,15 @@ export async function sendFirebasePhoneOtp(
 
     if (code === "auth/invalid-phone-number") {
       friendlyMessage = "Invalid phone number format. Please enter a valid 10-digit mobile number.";
+    } else if (code === "auth/unauthorized-domain") {
+      const currentHost = typeof window !== "undefined" ? window.location.hostname : "your domain";
+      friendlyMessage = `This domain (${currentHost}) is not authorized in Firebase Console. Please add "${currentHost}" under Authentication > Settings > Authorized domains in console.firebase.google.com.`;
     } else if (code === "auth/too-many-requests") {
       friendlyMessage = "Too many requests. Please wait a few moments before requesting another OTP.";
     } else if (code === "auth/quota-exceeded") {
       friendlyMessage = "Daily SMS limit reached on this project. Please contact support.";
     } else if (code === "auth/operation-not-allowed") {
-      friendlyMessage = "Phone Authentication is not enabled in Firebase Console. Please ensure Phone provider is toggled ON.";
+      friendlyMessage = "Phone Authentication is not enabled in Firebase Console. Please ensure Phone provider is toggled ON under Authentication > Sign-in method.";
     } else if (code === "auth/captcha-check-failed") {
       friendlyMessage = "reCAPTCHA verification failed. Please refresh and try again.";
     } else if (code === "auth/network-request-failed") {

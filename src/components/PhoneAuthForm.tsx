@@ -118,14 +118,8 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
     setLoading(true);
 
     try {
-      let res: any;
-      try {
-        // Primary: Firebase Phone Auth (Google real-time SMS to any mobile number)
-        res = await sendFirebasePhoneOtp(fullPhone);
-      } catch (fbErr: any) {
-        console.warn("[PhoneAuth] Firebase send error, attempting Supabase fallback:", fbErr.message);
-        res = await sendPhoneOtp(fullPhone);
-      }
+      // Primary: Firebase Phone Auth (Google real-time SMS to any mobile number)
+      const res = await sendFirebasePhoneOtp(fullPhone);
 
       setStep("otp");
       setResendTimer(30);
@@ -221,15 +215,7 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
     const fullPhone = getE164Phone();
 
     try {
-      let verifyResult: any;
-      try {
-        // Primary: Firebase Phone Auth
-        verifyResult = await verifyFirebasePhoneOtp(fullPhone, code);
-      } catch (fbErr: any) {
-        console.warn("[PhoneAuth] Firebase verify failed, attempting Supabase fallback:", fbErr.message);
-        verifyResult = await verifyPhoneOtp(fullPhone, code);
-      }
-
+      const verifyResult = await verifyFirebasePhoneOtp(fullPhone, code);
       const user = verifyResult.user;
       setAuthenticatedUser(user);
 
