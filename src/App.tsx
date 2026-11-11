@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 
 import Admin from "./pages/Admin";
 import InvoiceGenerator from "./pages/InvoiceGenerator";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,8 @@ const App = () => (
             <Route path="/booking" element={<Booking />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Login />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/invoice" element={<InvoiceGenerator />} />

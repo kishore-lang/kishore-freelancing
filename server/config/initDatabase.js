@@ -99,6 +99,42 @@ const initDatabase = async () => {
         );
       `);
 
+      // 7. Table: profiles (Supabase & Local user profiles)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS profiles (
+          id VARCHAR(255) PRIMARY KEY,
+          phone VARCHAR(50) NOT NULL,
+          full_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          course VARCHAR(255),
+          is_blocked BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // 8. Table: user_roles (Server-side Role Management)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS user_roles (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR(255),
+          email VARCHAR(255) UNIQUE,
+          role VARCHAR(50) NOT NULL DEFAULT 'user',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // Seed verified admin in user_roles
+      await client.query(`
+        INSERT INTO user_roles (email, role)
+        VALUES 
+          ('kishorekishore0783@gmail.com', 'admin'),
+          ('727823tucs132@skct.edu.in', 'admin'),
+          ('admin@kfreelance.online', 'admin'),
+          ('kfreelance@kfreelance.online', 'admin')
+        ON CONFLICT (email) DO UPDATE SET role = 'admin';
+      `);
+
       // 7. Seed Services (Idempotent seed using ON CONFLICT)
       await client.query(`
         INSERT INTO services (service_key, service_name, description, icon, price) VALUES

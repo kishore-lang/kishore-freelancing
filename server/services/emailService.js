@@ -184,6 +184,92 @@ class EmailService {
       return { success: false, error: err.message };
     }
   }
+
+  /**
+   * Sends a personalized welcome email to newly registered users/students.
+   * 
+   * @param {string} toEmail - Customer email address.
+   * @param {string} customerName - Name of the customer.
+   * @param {string} course - Course or service of interest.
+   * @returns {Promise<{success: boolean, data?: any, error?: string}>}
+   */
+  async sendWelcomeEmail(toEmail, customerName = "Member", course = "Web & Tech Services") {
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('[EmailService] RESEND_API_KEY is missing. Welcome email skipped.');
+      return { success: false, error: 'Missing API Key' };
+    }
+
+    if (!toEmail) {
+      return { success: false, error: 'Customer email is missing.' };
+    }
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+        <div style="background-color: #000000; padding: 28px 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px;">K FREELANCING</h1>
+          <p style="color: #ef4444; margin: 6px 0 0; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Client & Student Portal</p>
+        </div>
+        <div style="padding: 36px 30px;">
+          <h2 style="color: #09090b; font-size: 22px; margin-top: 0; font-weight: 800;">Welcome to K Freelancing, ${customerName}! 🎉</h2>
+          <p style="color: #52525b; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+            Thank you for registering with your phone number. Your client account has been activated successfully!
+          </p>
+
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+            <p style="margin: 0 0 10px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: #64748b;">Selected Area of Interest</p>
+            <p style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a;">${course}</p>
+          </div>
+
+          <h3 style="color: #1e293b; font-size: 16px; margin: 24px 0 12px; font-weight: 700;">What you can do next:</h3>
+          <ul style="color: #475569; font-size: 14px; line-height: 1.7; padding-left: 20px; margin: 0 0 24px;">
+            <li><strong>Access Your Dashboard:</strong> Log in anytime via OTP to view orders, deliverables, and timeline milestones.</li>
+            <li><strong>Invoices & Receipts:</strong> Download GST and tax-compliant PDF invoices whenever payments are completed.</li>
+            <li><strong>Direct Tech Support:</strong> Chat directly via WhatsApp or phone with founder Kishore J (+91 7904001962).</li>
+          </ul>
+
+          <div style="text-align: center; margin: 30px 0 20px;">
+            <a href="https://kfreelance.online/dashboard" style="display: inline-block; background-color: #dc2626; color: #ffffff; padding: 14px 32px; font-weight: 700; text-decoration: none; border-radius: 4px; font-size: 15px;">
+              Open My Dashboard →
+            </a>
+          </div>
+
+          <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+            Warm regards,<br>
+            <strong style="color: #0f172a;">Kishore J</strong><br>
+            Founder & Lead Engineer, K Freelancing<br>
+            <a href="mailto:kfreelance@kfreelance.online" style="color: #dc2626; text-decoration: none;">kfreelance@kfreelance.online</a>
+          </p>
+        </div>
+        <div style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 12px; color: #94a3b8;">
+          © ${new Date().getFullYear()} K Freelancing • Professional Web Architecture & Production
+        </div>
+      </div>
+    `;
+
+    try {
+      const resendClient = this.getResend();
+      if (!resendClient) {
+        return { success: false, error: 'Resend client unavailable' };
+      }
+      const { data, error } = await resendClient.emails.send({
+        from: this.defaultFrom,
+        to: [toEmail],
+        subject: `Welcome to K Freelancing, ${customerName}! Your portal is ready 🚀`,
+        html: htmlContent,
+      });
+
+      if (error) {
+        console.error('[EmailService] Error sending Welcome email:', error);
+        return { success: false, error: error.message };
+      }
+
+      console.log(`[EmailService] Welcome email sent to ${toEmail}. ID: ${data?.id}`);
+      return { success: true, data };
+    } catch (err) {
+      console.error('[EmailService] Exception during welcome email dispatch:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
 }
 
 // Export a singleton instance

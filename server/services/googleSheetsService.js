@@ -131,7 +131,74 @@ const appendContactToSheet = async (contactData) => {
   }
 };
 
+/**
+ * Appends a new registered user/student to the "Users" tab.
+ * Row columns: (name, mobile, course, date)
+ * @param {Object} userData
+ */
+const appendUserToSheet = async (userData) => {
+  try {
+    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    if (!sheetId || !clientEmail || !privateKey) {
+      console.warn("[Google Sheets] Missing credentials. Skipping user signup logging.");
+      return { success: false, message: "Missing credentials" };
+    }
+
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    const serviceAccountAuth = new JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+    await doc.loadInfo();
+
+    // Find or create "Users" tab
+    let usersSheet = doc.sheetsByTitle['Users'];
+    if (!usersSheet) {
+      try {
+        usersSheet = await doc.addSheet({ title: 'Users' });
+      } catch (addErr) {
+        // In case tab was just created concurrently
+        usersSheet = doc.sheetsByTitle['Users'] || doc.sheetsByIndex[0];
+      }
+    }
+
+    try {
+      await usersSheet.setHeaderRow(['name', 'mobile', 'course', 'date']);
+    } catch (e) {
+      // Header may already exist
+    }
+
+    const {
+      name = "N/A",
+      mobile = "N/A",
+      course = "N/A",
+      date = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    } = userData;
+
+    await usersSheet.addRow({
+      name: name,
+      mobile: mobile,
+      course: course,
+      date: date,
+    });
+
+    console.log(`[Google Sheets] Successfully appended user '${name}' (${mobile}) to 'Users' tab`);
+    return { success: true };
+  } catch (error) {
+    console.error("[Google Sheets] Error appending user to Users tab:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   appendOrderToSheet,
-  appendContactToSheet
+  appendContactToSheet,
+  appendUserToSheet
 };

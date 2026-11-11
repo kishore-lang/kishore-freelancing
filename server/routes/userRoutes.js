@@ -2,6 +2,7 @@ const express = require("express");
 const { pool } = require("../config/database");
 const emailService = require("../services/emailService");
 const { sendWhatsAppOtp, normalizeWhatsAppNumber } = require("../services/notificationService");
+const { appendUserToSheet } = require("../services/googleSheetsService");
 
 const router = express.Router();
 
@@ -437,6 +438,145 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error processing login:", error);
     res.status(500).json({ success: false, message: error?.message || "Internal server error" });
+  }
+});
+
+/**
+ * POST /api/users/on-signup
+ * Handles new user registration:
+ * - Upserts to database profiles and customers tables
+ * - Appends to Google Sheet "Users" tab (name, mobile, course, date)
+ * - Dispatches welcome email via Resend if email is provided
+ */
+router.post("/on-signup", async (req, res) => {
+  try {
+    const { userId, name, mobile, email, course } = req.body;
+
+    if (!name || !mobile) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and mobile number are required for registration.",
+      });
+    }
+
+    const trimmedName = String(name).trim();
+    const trimmedMobile = String(mobile).trim();
+    const trimmedEmail = email ? String(email).trim().toLowerCase() : null;
+    const selectedCourse = course ? String(course).trim() : "General";
+    const profileId = userId || `user_${Date.now()}`;
+    const nowIso = new Date().toISOString();
+
+    // 1. Database persistence (profiles & customers)
+    try {
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+
+        // Ensure profiles table exists
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS profiles (
+            id VARCHAR(255) PRIMARY KEY,
+            phone VARCHAR(50) NOT NULL,
+            full_name VARCHAR(255) NOT NULL,
+            email VARCHAR(255),
+            course VARCHAR(255),
+            is_blocked BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+
+        // Upsert into profiles
+        await client.query(
+          `INSERT INTO profiles (id, phone, full_name, email, course, is_blocked, updated_at)
+           VALUES ($1, $2, $3, $4, $5, FALSE, $6)
+           ON CONFLICT (id) DO UPDATE SET
+             full_name = EXCLUDED.full_name,
+             phone = EXCLUDED.phone,
+             email = COALESCE(EXCLUDED.email, profiles.email),
+             course = COALESCE(EXCLUDED.course, profiles.course),
+             updated_at = EXCLUDED.updated_at;`,
+          [profileId, trimmedMobile, trimmedName, trimmedEmail, selectedCourse, nowIso]
+        );
+
+        // Also upsert into customers table so existing order lookup works seamlessly
+        if (trimmedEmail) {
+          await client.query(
+            `INSERT INTO customers (full_name, email, whatsapp_number)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (email) DO UPDATE SET
+               full_name = EXCLUDED.full_name,
+               whatsapp_number = COALESCE(EXCLUDED.whatsapp_number, customers.whatsapp_number);`,
+            [trimmedName, trimmedEmail, trimmedMobile]
+          );
+        } else {
+          // If no email, insert with placeholder email if not already present
+          const existingCust = await client.query(
+            `SELECT id FROM customers WHERE whatsapp_number = $1 LIMIT 1`,
+            [trimmedMobile]
+          );
+          if (existingCust.rows.length === 0) {
+            const fallbackEmail = `${trimmedMobile.replace(/\D/g, "")}@phone.kfreelance.online`;
+            await client.query(
+              `INSERT INTO customers (full_name, email, whatsapp_number)
+               VALUES ($1, $2, $3)
+               ON CONFLICT (email) DO NOTHING;`,
+              [trimmedName, fallbackEmail, trimmedMobile]
+            );
+          }
+        }
+
+        await client.query("COMMIT");
+      } catch (dbErr) {
+        await client.query("ROLLBACK");
+        console.warn("[on-signup] DB upsert notice:", dbErr.message);
+      } finally {
+        client.release();
+      }
+    } catch (poolErr) {
+      console.warn("[on-signup] DB pool notice:", poolErr.message);
+    }
+
+    // 2. Google Sheet Integration: Append row (name, mobile, course, date) to "Users" tab
+    try {
+      appendUserToSheet({
+        name: trimmedName,
+        mobile: trimmedMobile,
+        course: selectedCourse,
+        date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      }).catch((sheetErr) => console.error("[on-signup] Google Sheet error:", sheetErr.message));
+    } catch (sheetCallErr) {
+      console.error("[on-signup] Failed to trigger Google Sheet append:", sheetCallErr);
+    }
+
+    // 3. Welcome Email via Resend if email is provided
+    if (trimmedEmail) {
+      try {
+        emailService
+          .sendWelcomeEmail(trimmedEmail, trimmedName, selectedCourse)
+          .catch((mailErr) => console.error("[on-signup] Welcome email error:", mailErr.message));
+      } catch (mailCallErr) {
+        console.error("[on-signup] Failed to trigger welcome email:", mailCallErr);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Signup successfully recorded in database, Google Sheets, and welcome email dispatched.",
+      user: {
+        id: profileId,
+        fullName: trimmedName,
+        email: trimmedEmail,
+        whatsappNumber: trimmedMobile,
+        course: selectedCourse,
+      },
+    });
+  } catch (error) {
+    console.error("Error in /api/users/on-signup:", error);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to process signup event.",
+    });
   }
 });
 

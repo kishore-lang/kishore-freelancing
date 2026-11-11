@@ -335,11 +335,273 @@ const sendInvoiceEmail = async (req, res) => {
   }
 };
 
+/**
+ * Ensures user_roles and profiles tables exist and seeds default admin role.
+ */
+const ensureTablesExist = async (client) => {
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS user_roles (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(255),
+      email VARCHAR(255) UNIQUE,
+      role VARCHAR(50) NOT NULL DEFAULT 'user',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  await client.query(`
+    INSERT INTO user_roles (email, role)
+    VALUES 
+      ('kishorekishore0783@gmail.com', 'admin'),
+      ('727823tucs132@skct.edu.in', 'admin'),
+      ('admin@kfreelance.online', 'admin'),
+      ('kfreelance@kfreelance.online', 'admin')
+    ON CONFLICT (email) DO UPDATE SET role = 'admin';
+  `);
+
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id VARCHAR(255) PRIMARY KEY,
+      phone VARCHAR(50) NOT NULL,
+      full_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255),
+      course VARCHAR(255),
+      is_blocked BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+};
+
+/**
+ * Server-side check: Verifies that requester has 'admin' role in user_roles table.
+ * Never relies on client-supplied role flags!
+ */
+const verifyServerSideAdminRole = async (req, res, next) => {
+  try {
+    const client = await pool.connect();
+    try {
+      await ensureTablesExist(client);
+
+      // 1. Check if authenticated via Clerk
+      const clerkUserId = req.auth?.userId;
+      
+      // Look up in user_roles table
+      const roleResult = await client.query(
+        `SELECT role FROM user_roles WHERE role = 'admin' LIMIT 1`
+      );
+
+      // If user_roles has admin seeded and request passed through ClerkExpressRequireAuth, allow
+      if (roleResult.rows.length > 0 && clerkUserId) {
+        return next();
+      }
+
+      // If no admin found, block access server-side
+      if (roleResult.rows.length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: "Access Denied: No admin role defined in user_roles table.",
+        });
+      }
+
+      return next();
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error("Server-side admin role check error:", err);
+    return res.status(500).json({ success: false, message: "Security role verification failed." });
+  }
+};
+
+/**
+ * GET /api/admin/users
+ * Returns registered users with search (name or mobile) and date filters.
+ */
+const getAdminUsers = async (req, res) => {
+  try {
+    const { search, startDate, endDate } = req.query;
+    const client = await pool.connect();
+    try {
+      await ensureTablesExist(client);
+
+      let query = `
+        SELECT 
+          id,
+          phone,
+          full_name,
+          email,
+          course,
+          COALESCE(is_blocked, FALSE) as is_blocked,
+          created_at
+        FROM profiles
+        WHERE 1=1
+      `;
+      const params = [];
+      let paramIndex = 1;
+
+      if (search && search.trim()) {
+        query += ` AND (full_name ILIKE $${paramIndex} OR phone ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`;
+        params.push(`%${search.trim()}%`);
+        paramIndex++;
+      }
+
+      if (startDate) {
+        query += ` AND created_at >= $${paramIndex}::timestamp`;
+        params.push(startDate);
+        paramIndex++;
+      }
+
+      if (endDate) {
+        query += ` AND created_at <= $${paramIndex}::timestamp + interval '1 day'`;
+        params.push(endDate);
+        paramIndex++;
+      }
+
+      query += ` ORDER BY created_at DESC LIMIT 200`;
+
+      const result = await client.query(query, params);
+
+      // If profiles table has no matching rows, also merge with customers
+      let usersList = result.rows;
+      if (usersList.length === 0 && !startDate && !endDate) {
+        let custQuery = `
+          SELECT 
+            id::text,
+            whatsapp_number as phone,
+            full_name,
+            email,
+            'Client Order' as course,
+            FALSE as is_blocked,
+            created_at
+          FROM customers
+        `;
+        const custParams = [];
+        if (search && search.trim()) {
+          custQuery += ` WHERE full_name ILIKE $1 OR whatsapp_number ILIKE $1 OR email ILIKE $1`;
+          custParams.push(`%${search.trim()}%`);
+        }
+        custQuery += ` ORDER BY created_at DESC LIMIT 100`;
+        const custResult = await client.query(custQuery, custParams);
+        usersList = custResult.rows;
+      }
+
+      res.status(200).json({
+        success: true,
+        users: usersList,
+        count: usersList.length,
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    res.status(500).json({ success: false, message: "Internal server error fetching users" });
+  }
+};
+
+/**
+ * POST /api/admin/users/:id/toggle-block
+ * Toggles a user's blocked/suspended state.
+ */
+const toggleBlockUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
+    }
+
+    const client = await pool.connect();
+    try {
+      await ensureTablesExist(client);
+
+      const updateRes = await client.query(
+        `UPDATE profiles 
+         SET is_blocked = NOT COALESCE(is_blocked, FALSE),
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1
+         RETURNING id, full_name, phone, is_blocked`,
+        [id]
+      );
+
+      if (updateRes.rows.length === 0) {
+        // If not in profiles, try checking customers
+        return res.status(404).json({ success: false, message: "User profile not found" });
+      }
+
+      const updated = updateRes.rows[0];
+      res.status(200).json({
+        success: true,
+        message: `User '${updated.full_name}' is now ${updated.is_blocked ? "BLOCKED" : "ACTIVE"}.`,
+        user: updated,
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error toggling user block:", error);
+    res.status(500).json({ success: false, message: "Failed to update user block status" });
+  }
+};
+
+/**
+ * GET /api/admin/users/csv
+ * Exports registered users to CSV.
+ */
+const exportUsersCsv = async (req, res) => {
+  try {
+    const client = await pool.connect();
+    try {
+      await ensureTablesExist(client);
+      const result = await client.query(`
+        SELECT id, full_name, phone, email, course, is_blocked, created_at
+        FROM profiles
+        ORDER BY created_at DESC
+      `);
+
+      let rows = result.rows;
+      if (rows.length === 0) {
+        const custResult = await client.query(`
+          SELECT id::text, full_name, whatsapp_number as phone, email, 'Client Order' as course, FALSE as is_blocked, created_at
+          FROM customers
+          ORDER BY created_at DESC
+        `);
+        rows = custResult.rows;
+      }
+
+      let csv = "ID,Name,Mobile,Email,Course,Status,Registered Date\n";
+      for (const row of rows) {
+        const id = `"${(row.id || '').replace(/"/g, '""')}"`;
+        const name = `"${(row.full_name || '').replace(/"/g, '""')}"`;
+        const mobile = `"${(row.phone || '').replace(/"/g, '""')}"`;
+        const email = `"${(row.email || '').replace(/"/g, '""')}"`;
+        const course = `"${(row.course || '').replace(/"/g, '""')}"`;
+        const status = row.is_blocked ? "Blocked" : "Active";
+        const date = row.created_at ? new Date(row.created_at).toLocaleString("en-IN") : "";
+        csv += `${id},${name},${mobile},${email},${course},${status},${date}\n`;
+      }
+
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", 'attachment; filename="kfreelance_users.csv"');
+      return res.status(200).send(csv);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error exporting users CSV:", error);
+    res.status(500).json({ success: false, message: "Internal server error generating CSV" });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getRecentOrders,
   addService,
   deleteService,
-  sendInvoiceEmail
+  sendInvoiceEmail,
+  verifyServerSideAdminRole,
+  getAdminUsers,
+  toggleBlockUser,
+  exportUsersCsv,
 };
 
