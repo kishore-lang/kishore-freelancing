@@ -723,9 +723,6 @@ export const PhoneAuthForm: React.FC<PhoneAuthFormProps> = ({ onSuccess, classNa
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Invisible container for Firebase phone auth reCAPTCHA */}
-      <div id="recaptcha-container"></div>
     </div>
   );
 };
