@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import InvoiceGenerator from "./pages/InvoiceGenerator";
 import Login from "./pages/Login";
+import Proposal from "./pages/Proposal";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/invoice" element={<InvoiceGenerator />} />
             <Route path="/invoice" element={<InvoiceGenerator />} />
+            <Route path="/proposal/:slug" element={<Proposal />} />
+            <Route path="/proposals/:slug" element={<Proposal />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -105,6 +105,10 @@ app.use("/api/admin", adminRoutes);
 const serviceRoutes = require("./routes/serviceRoutes");
 app.use("/api/services", serviceRoutes);
 
+// Public Proposal Routes
+const proposalRoutes = require("./routes/proposalRoutes");
+app.use("/api/proposals", proposalRoutes);
+
 // Contact Route
 const contactRoutes = require("./routes/contactRoutes");
 app.use("/api/contact", contactRoutes);

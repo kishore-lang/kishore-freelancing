@@ -11,6 +11,11 @@ const {
   toggleBlockUser,
   exportUsersCsv
 } = require("../controllers/adminController");
+const {
+  createProposal,
+  getAdminProposals,
+  deleteProposal
+} = require("../controllers/proposalController");
 const router = express.Router();
 
 // 1. Verify authentication token
@@ -31,6 +36,11 @@ router.post("/send-invoice-email", sendInvoiceEmail);
 router.get("/users", getAdminUsers);
 router.post("/users/:id/toggle-block", toggleBlockUser);
 router.get("/users/csv", exportUsersCsv);
+
+// Proposal Management Routes
+router.post("/proposals", createProposal);
+router.get("/proposals", getAdminProposals);
+router.delete("/proposals/:id", deleteProposal);
 
 // Simple verify route for the frontend to check if a password is correct
 router.post("/verify-password", (req, res) => {
