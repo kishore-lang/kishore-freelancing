@@ -17,6 +17,7 @@ import InvoiceGenerator from "./pages/InvoiceGenerator";
 import Login from "./pages/Login";
 import Proposal from "./pages/Proposal";
 import OurWorks from "./pages/OurWorks";
+import AboutPage from "./pages/AboutPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/freelancing" element={<Freelancing />} />
             <Route path="/our-works" element={<OurWorks />} />
             <Route path="/works" element={<OurWorks />} />
