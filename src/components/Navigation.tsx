@@ -14,8 +14,9 @@ export const Navigation = () => {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "About Us", path: "/#about" },
+    { name: "Our Works", path: "/our-works" },
     { name: "Services", path: "/freelancing" },
+    { name: "About Us", path: "/#about" },
     { name: "Contact", path: "/#contact" },
   ];
 

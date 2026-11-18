@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import InvoiceGenerator from "./pages/InvoiceGenerator";
 import Login from "./pages/Login";
 import Proposal from "./pages/Proposal";
+import OurWorks from "./pages/OurWorks";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/freelancing" element={<Freelancing />} />
+            <Route path="/our-works" element={<OurWorks />} />
+            <Route path="/works" element={<OurWorks />} />
+            <Route path="/projects" element={<OurWorks />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/contact" element={<Contact />} />

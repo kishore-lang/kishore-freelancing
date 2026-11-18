@@ -67,10 +67,21 @@ export const Hero = () => {
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold shadow-xl shadow-red-600/20 text-sm sm:text-base rounded-none"
-                onClick={() => window.location.href = '/freelancing'}
+                onClick={() => window.location.href = '/our-works'}
               >
                 <ArrowRight className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                View Our Services
+                Explore Our Works (9+ Live Sites)
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto border-black text-black hover:bg-black hover:text-white font-bold text-sm sm:text-base rounded-none"
+                onClick={() => window.location.href = '/freelancing'}
+              >
+                View Services & Pricing
               </Button>
             </motion.div>
           </motion.div>
