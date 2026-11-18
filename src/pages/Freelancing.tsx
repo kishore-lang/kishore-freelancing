@@ -29,7 +29,9 @@ const Freelancing = () => {
               price: s.price ? `₹${Number(s.price).toLocaleString("en-IN")}` : "₹5,000 - ₹1,00,000+",
               numericPrice: s.price ? Number(s.price) : 0,
               icon: IconComponent,
-              isCustom: isCustom
+              isCustom: isCustom,
+              image_url: s.image_url || null,
+              imageUrl: s.image_url || null,
             };
           });
           setServices(mappedServices);

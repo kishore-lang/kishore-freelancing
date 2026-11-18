@@ -11,6 +11,8 @@ export interface ServiceItem {
   numericPrice?: number;
   icon: LucideIcon;
   isCustom?: boolean;
+  image_url?: string | null;
+  imageUrl?: string | null;
 }
 
 interface ServiceCardProps {
@@ -33,7 +35,7 @@ const getImageForService = (title: string, Icon: LucideIcon) => {
 
 export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps) => {
   const navigate = useNavigate();
-  const imageUrl = getImageForService(service.title, service.icon);
+  const imageUrl = service.image_url || service.imageUrl || getImageForService(service.title, service.icon);
   
   // Check if this is a rental item
   const isRental = service.title.toLowerCase().includes('rental') || service.title.toLowerCase().includes('rent');
@@ -79,6 +81,9 @@ export const ServiceCard = ({ service, isSelected, onSelect }: ServiceCardProps)
         <img 
           src={imageUrl} 
           alt={service.title} 
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/service_web.jpg";
+          }}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent"></div>

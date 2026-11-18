@@ -101,7 +101,7 @@ const getRecentOrders = async (req, res) => {
  */
 const addService = async (req, res) => {
   try {
-    const { service_name, description, icon, price } = req.body;
+    const { service_name, description, icon, price, image_url } = req.body;
     
     if (!service_name) {
       return res.status(400).json({ success: false, message: "Service name is required" });
@@ -113,11 +113,14 @@ const addService = async (req, res) => {
     const client = await pool.connect();
     
     try {
+      // Ensure image_url column exists in database
+      await client.query(`ALTER TABLE services ADD COLUMN IF NOT EXISTS image_url TEXT;`);
+
       const result = await client.query(`
-        INSERT INTO services (service_key, service_name, description, icon, price)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO services (service_key, service_name, description, icon, price, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
-      `, [service_key, service_name, description || '', icon || 'Sparkles', price || null]);
+      `, [service_key, service_name, description || '', icon || 'Sparkles', price || null, image_url || null]);
 
       await clearServiceCache();
       res.status(201).json({

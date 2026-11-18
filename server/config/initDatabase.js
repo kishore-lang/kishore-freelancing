@@ -41,6 +41,7 @@ const initDatabase = async () => {
         ALTER TABLE services 
         ADD COLUMN IF NOT EXISTS description TEXT,
         ADD COLUMN IF NOT EXISTS icon VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS image_url TEXT,
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
       `);
 
